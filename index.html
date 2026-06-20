@@ -196,7 +196,7 @@
   <!-- ========== キーワード検索 ========== -->
   <section id="mode-search" class="hidden">
     <div class="searchrow">
-      <input type="text" id="q" placeholder="例：緩み止め／石膏ボード／ホース 締める" autocomplete="off">
+      <input type="text" id="q" placeholder="日本語/中文OK 例：緩み止め／石膏ボード／螺栓／膨胀螺栓" autocomplete="off">
       <button class="clear" id="clear">クリア</button>
     </div>
     <div class="filters" id="filters">
@@ -209,7 +209,7 @@
     <div class="examples">
       <b>例：</b>
       <span class="ex">緩み止め</span><span class="ex">石膏ボード</span><span class="ex">木 つなぐ</span>
-      <span class="ex">ホース 締める</span><span class="ex">引き出し レール</span><span class="ex">高さ 調整</span>
+      <span class="ex">螺栓</span><span class="ex">合页</span><span class="ex">膨胀螺栓</span><span class="ex">防松</span>
     </div>
     <div class="meta" id="meta"></div>
     <div id="results"></div>
@@ -1225,10 +1225,15 @@ const norm=s=>(s||"").toString().toLowerCase()
   .replace(/[ァ-ン]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60))
   .replace(/[\s　,、。・／/]+/g," ").trim();
 DB.forEach(p=>{p._hay={name:norm(p.name+" "+p.yomi),alias:norm((p.aliases||[]).join(" ")),
-  tags:norm((p.tags||[]).join(" ")),uses:norm(p.uses),desc:norm(p.desc)};});
+  tags:norm((p.tags||[]).join(" ")),uses:norm(p.uses),desc:norm(p.desc),
+  zhname:norm(p.zh),zhuse:norm(p.zhUse)};});
 function scoreItem(p,tokens){let s=0,hit=0;for(const t of tokens){if(!t)continue;let g=0;
-  if(p._hay.name.includes(t))g=Math.max(g,6);if(p._hay.alias.includes(t))g=Math.max(g,5);
-  if(p._hay.tags.includes(t))g=Math.max(g,4);if(p._hay.uses.includes(t))g=Math.max(g,2);
+  if(p._hay.name.includes(t))g=Math.max(g,6);
+  if(p._hay.zhname.includes(t))g=Math.max(g,6);   // 中文名でも検索可
+  if(p._hay.alias.includes(t))g=Math.max(g,5);
+  if(p._hay.tags.includes(t))g=Math.max(g,4);
+  if(p._hay.zhuse.includes(t))g=Math.max(g,3);    // 中文の用途訳でも検索可
+  if(p._hay.uses.includes(t))g=Math.max(g,2);
   if(p._hay.desc.includes(t))g=Math.max(g,1);if(g){s+=g;hit++;}}if(hit>1)s+=hit*2;return s;}
 function tokenize(q){const base=norm(q);if(!base)return[];const words=base.split(" ").filter(Boolean);
   const set=new Set(words);if(words.length<=1&&base.replace(/ /g,"").length>=3){const c=base.replace(/ /g,"");
