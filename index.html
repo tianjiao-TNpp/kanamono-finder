@@ -36,6 +36,7 @@
   .tile .ic{font-size:1.5rem;display:block;margin-bottom:6px}
   .tile .tl{font-weight:700;font-size:1rem}
   .tile .sb{color:var(--sub);font-size:.8rem;margin-top:3px}
+  .tile .tzh{display:block;color:#8fd0ff;font-size:.78rem;margin-top:4px}
 
   .crumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 2px 14px;font-size:.9rem;color:var(--sub)}
   .crumb .path{color:var(--accent2);font-weight:600}
@@ -752,6 +753,40 @@ const ZH={
 };
 DB.forEach(p=>{p.zh=ZH[p.id]||"";});
 
+/* ===== 中文：用途の一言訳 ===== */
+const ZHUSE={
+ 1:"钢材/机械的通用紧固，需配螺母",2:"机械部件、需埋头或狭窄处紧固",3:"与螺栓配对紧固",4:"振动部位防止松动",
+ 5:"分散压力、保护接触面",6:"辅助防松（垫在螺母下）",7:"金属/塑料件通用拧紧（需内螺纹）",8:"埋头与表面齐平",
+ 9:"固定薄板、大面积压紧",10:"直接固定薄金属板/塑料，免攻丝",11:"木材接合、固定到底层",12:"混凝土地面/墙固定重物",
+ 13:"混凝土/砖墙固定轻中物",14:"空心石膏板墙挂物",15:"免工具手拧、频繁拆装",16:"免工具手拧",
+ 17:"吊装、需调节长度的紧固",18:"木件反复拆装、装脚",19:"单面铆接薄板、永久固定",20:"轴上零件防脱",21:"螺母/销防脱、防松",
+ 30:"门/盖的转动开合",31:"橱柜门、隐藏可调",32:"直角加固、防晃",33:"墙面搁板支撑",34:"拼板、活动搁板支点",35:"推车/家具移动",
+ 36:"推拉门开合",37:"抽屉前后推拉",38:"家具/门的把手",39:"小门/抽屉旋钮",40:"防止开门自开",41:"上翻门定位/缓降",
+ 42:"木材连接防分离",43:"墙/顶吊挂收纳",
+ 60:"管/线沿墙固定",61:"管道支撑/吊挂",62:"软管接头处防漏防脱",63:"线缆捆扎整理",64:"室内布线固定",65:"重物吊装、绳索系留",
+ 66:"钢丝张力调节",67:"绳/链可拆连接",68:"一键挂脱连接",69:"钢丝端头做环固定",70:"电线接到螺丝端子",
+ 90:"调高度、找平防晃",91:"防滑、护地、减震",92:"制造间隙/距离",93:"薄板上做内螺纹",
+ 100:"隐藏螺丝尖端、美观",101:"防转、嵌槽",102:"接长螺栓/牙条",103:"内螺纹侧吊点",104:"固定轴/防空转、无头",
+ 105:"抱箍圆管/圆棒",106:"波板/折板屋顶固定",107:"免引孔直接固定铁板",108:"防松＋导通接地",109:"木材座面、分散压力",
+ 120:"木材快速接合",121:"防松脱、地板防响",122:"收尾材不显眼固定",123:"混凝土上钉木条",124:"网/布/保温材快速固定",
+ 130:"梁柱防拔加固",131:"接头处抗拉加固",132:"出角/接口加固",133:"斜撑端部加固",134:"斜撑端部固定(抗震)",
+ 135:"柱脚抗拔(抗震)",136:"楼面/屋架水平加固",137:"可调高度搁板支柱",138:"限位/护墙、定门",139:"库房/门挂锁",
+ 140:"双开门一侧固定",141:"门的上锁",143:"挂画/镜",
+ 150:"吊/连接/隔断/系留",151:"吊/张/晾晒",152:"链/绳端部吊具",153:"防止绳链扭转",154:"汇集吊点/系结点",155:"一键挂脱连接",
+ 160:"多股电线压接",161:"免工具接线",162:"顶部吊挂管道",
+ 170:"保护穿孔电线",171:"减震防噪、吸收晃动",172:"密封防漏(水/气/油)",173:"消音、防撞、护面",174:"反复粘贴、捆扎临时固定",
+ 175:"回位、施加张力",176:"回弹、填隙",
+};
+DB.forEach(p=>{p.zhUse=ZHUSE[p.id]||"";});
+
+/* ===== 中文：カテゴリ（最外側タイル）訳 ===== */
+const INTENT_ZH={
+ mount:"固定到墙/地/顶",join:"把东西连接起来",hang:"吊挂・挂起",door:"门/盖的开合",
+ move:"移动・滑动",loosen:"防松・防脱",wire:"固定线缆/软管/管道",adjust:"调整高度/间隙/晃动",
+ hand:"免工具手拧",head:"按螺丝头型选择",nail:"用钉/码钉固定",reinforce:"木结构加固（建筑五金）",
+ secure:"关门防盗・上锁",shelf:"做搁板/收纳",chain:"用链/绳连接·吊挂",connect:"连接电线（接线）",
+};
+
 /* ===== ふりがな辞書（専門用語・動詞の漢字読み）=====
    自動ルビ：辞書語を最長一致で <ruby> に変換（学習用の目安）。 */
 const READINGS={
@@ -802,6 +837,13 @@ function furigana(text){
   return out;
 }
 function zhLine(p){return (zhOn&&p.zh)?`<div class="zh">🇨🇳 ${p.zh}</div>`:"";}
+// 部品名そのものにルビ：（）以降は別名なので、主名称にだけ yomi のルビを振る
+function nameRuby(p){
+  if(!furiOn) return p.name;
+  const m=p.name.match(/^([^（(]+)([（(].*)?$/);
+  const main=m?m[1]:p.name, rest=(m&&m[2])?m[2]:"";
+  return `<ruby>${main}<rt>${p.yomi}</rt></ruby>${rest}`;
+}
 function refreshAll(){
   if(typeof renderTiles==="function") renderTiles();
   if(typeof renderSearch==="function") renderSearch();
@@ -1105,12 +1147,13 @@ function cardHTML(p,why,tokens){
   return `<div class="card"><div class="cardrow">
     <div class="illus">${illusHTML(p)}</div>
     <div class="cbody">
-      <h3><span>${hi(p.name)}</span><span class="yomi">${p.yomi}</span>
+      <h3><span>${has?hi(p.name):nameRuby(p)}</span>${(!furiOn||has)?`<span class="yomi">${p.yomi}</span>`:""}
           <span class="catbadge cat-${p.cat}">${CATLABEL[p.cat]}</span></h3>
       ${zhLine(p)}
       ${whyHTML}
       <p class="desc">${tx(p.desc)}</p>
       <p class="uses"><b>用途：</b>${tx(p.uses)}</p>
+      ${zhOn&&p.zhUse?`<div class="zh">🇨🇳 用途：${p.zhUse}</div>`:""}
       ${specTable(p)}
       <div class="tags">${aliases}</div>
       ${actions}
@@ -1132,6 +1175,7 @@ function renderTiles(){
   elIntentGrid.innerHTML=INTENTS.map((it,i)=>
     `<div class="tile" data-i="${i}">
        <span class="ic">${it.ic}</span><span class="tl">${furigana(it.label)}</span><span class="sb">${furigana(it.sub)}</span>
+       ${zhOn&&INTENT_ZH[it.key]?`<span class="tzh">🇨🇳 ${INTENT_ZH[it.key]}</span>`:""}
      </div>`).join("");
 }
 renderTiles();
