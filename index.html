@@ -136,6 +136,15 @@
   .qnext{background:var(--accent);border:none;color:#06121f;font-weight:700;border-radius:12px;padding:12px 22px;cursor:pointer;font-size:1rem}
   .qskip{background:var(--panel2);border:1px solid var(--line);color:var(--sub);border-radius:12px;padding:12px 18px;cursor:pointer;font-size:.95rem}
   .qskip:hover{color:var(--txt)}
+
+  /* language helpers (ふりがな / 中文) */
+  .langbar{display:flex;gap:8px;margin:10px 0 0;flex-wrap:wrap}
+  .langtog{font-size:.82rem;border:1px solid var(--line);background:var(--panel);color:var(--sub);
+    border-radius:999px;padding:5px 12px;cursor:pointer;user-select:none}
+  .langtog.on{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:700}
+  ruby rt{font-size:.62em;color:var(--accent);font-weight:400;letter-spacing:0}
+  .zh{color:#8fd0ff;font-size:.84rem;margin-top:3px}
+  .qzh{color:#8fd0ff;font-size:.95rem;margin-top:4px}
   mark{background:rgba(255,180,84,.28);color:#ffd9a0;border-radius:3px;padding:0 2px}
 
   .examples{margin-top:12px;color:var(--sub);font-size:.82rem}
@@ -160,6 +169,11 @@
     <div class="modetab active" data-mode="guide">🧭 用途から探す</div>
     <div class="modetab" data-mode="search">🔍 キーワード検索</div>
     <div class="modetab" data-mode="quiz">🎴 金物クイズ</div>
+  </div>
+
+  <div class="langbar">
+    <span class="langtog on" data-tog="furi">あ ふりがな</span>
+    <span class="langtog on" data-tog="zh">🇨🇳 中文</span>
   </div>
 
   <!-- ========== 用途から探す ========== -->
@@ -713,6 +727,88 @@ const DB=[
 ];
 const byId=id=>DB.find(p=>p.id===id);
 
+/* ===== 中文翻訳（部品名）===== */
+const ZH={
+ 1:"六角螺栓",2:"内六角螺栓（杯头）",3:"六角螺母",4:"防松螺母（尼龙锁母）",5:"平垫圈",6:"弹簧垫圈",
+ 7:"盘头螺丝",8:"沉头螺丝",9:"大扁头螺丝",10:"自攻螺丝",11:"木螺丝（自攻木牙）",12:"膨胀螺栓（地脚锚栓）",
+ 13:"塑料胀塞",14:"石膏板锚栓",15:"蝶形螺栓（手拧）",16:"蝶形螺母",17:"全牙螺杆（牙条）",18:"木用预埋螺母（爪母）",
+ 19:"抽芯铆钉",20:"卡簧（E型挡圈）",21:"开口销",
+ 30:"合页（铰链）",31:"暗铰链（液压橱柜铰）",32:"L型角码",33:"搁板托架",34:"木榫（圆木销）",35:"脚轮",
+ 36:"移门滑轮",37:"抽屉滑轨",38:"拉手",39:"旋钮（小拉手）",40:"磁碰（门吸碰珠）",41:"撑杆（气撑/阻尼）",
+ 42:"扒钉（骑马钉）",43:"挂钩",
+ 60:"管卡（马鞍卡）",61:"管夹（吊管夹）",62:"喉箍（软管卡箍）",63:"扎带（束线带）",64:"钉式线卡（U型线钉）",
+ 65:"吊环螺栓",66:"花篮螺丝（紧线器）",67:"卸扣（U型卸扣）",68:"弹簧扣（登山扣）",69:"钢丝绳卡头",70:"压接端子（线鼻子）",
+ 90:"调节脚（地脚）",91:"橡胶脚垫",92:"间隔柱（垫柱）",93:"压铆/拉铆螺母",
+ 100:"盖型螺母（圆头）",101:"方螺母",102:"长螺母（接头螺母）",103:"吊环螺母",104:"紧定螺丝（机米螺丝）",
+ 105:"U型螺栓",106:"钩头螺栓（J型）",107:"钻尾螺丝（自钻）",108:"齿形垫圈",109:"方垫圈",
+ 120:"圆钉（铁钉）",121:"螺纹钉（地板钉）",122:"无头收尾钉",123:"水泥钉（钢钉）",124:"码钉（枪钉）",
+ 130:"羽子板螺栓（梁柱拉结）",131:"长条扁铁连接件",132:"角连接件（L型）",133:"山形连接板（V型）",134:"斜撑连接件",
+ 135:"抗拔件（HD金属件）",136:"角隅斜撑件",137:"搁板立柱（开槽轨道）",138:"门挡（门吸）",139:"搭扣（挂锁扣）",
+ 140:"插销（地天插）",141:"外装门锁（执手锁）",143:"挂画钩（画轨）",
+ 150:"链条",151:"钢丝绳",152:"起重吊钩",153:"转环（防扭）",154:"圆环（焊接吊环）",155:"弹簧钩（茄子扣）",
+ 160:"接线套管（压线管）",161:"快速接线端子（插入式）",162:"吊管夹",
+ 170:"护线圈（橡胶护套）",171:"防振橡胶（减震垫）",172:"O型密封圈",173:"缓冲胶垫（防撞垫）",174:"魔术贴（粘扣带）",
+ 175:"拉簧",176:"压簧",
+};
+DB.forEach(p=>{p.zh=ZH[p.id]||"";});
+
+/* ===== ふりがな辞書（専門用語・動詞の漢字読み）=====
+   自動ルビ：辞書語を最長一致で <ruby> に変換（学習用の目安）。 */
+const READINGS={
+ "締め付け":"しめつけ","締める":"しめる","締め":"しめ","締結":"ていけつ","留める":"とめる","留め":"とめ",
+ "止める":"とめる","止め輪":"とめわ","止め":"とめ","吊り上げ":"つりあげ","吊り下げ":"つりさげ","吊り":"つり","吊る":"つる",
+ "抜ける":"ぬける","抜け止め":"ぬけどめ","抜け":"ぬけ","抜く":"ぬく","緩み止め":"ゆるみどめ","緩む":"ゆるむ","緩み":"ゆるみ",
+ "押さえる":"おさえる","支える":"ささえる","受ける":"うける","棚受け":"たなうけ","掛ける":"かける","掛け":"かけ","掛金":"かけがね",
+ "引き出し":"ひきだし","引き戸":"ひきど","引き抜き":"ひきぬき","引き寄せ":"ひきよせ","引っ掛け":"ひっかけ","引っ張る":"ひっぱる","引く":"ひく",
+ "差し込む":"さしこむ","差込":"さしこみ","挿す":"さす","束ねる":"たばねる","繋ぐ":"つなぐ","継手":"つぎて","継ぎ目":"つぎめ","継ぐ":"つぐ",
+ "回す":"まわす","回転":"かいてん","回り":"まわり","隠す":"かくす","隠れる":"かくれる","隠し":"かくし","沈める":"しずめる",
+ "埋め込む":"うめこむ","埋め込み":"うめこみ","打ち込む":"うちこむ","打ち込み":"うちこみ","打つ":"うつ","張力":"ちょうりょく","張る":"はる",
+ "守る":"まもる","防振":"ぼうしん","防音":"ぼうおん","防犯":"ぼうはん","防虫":"ぼうちゅう","防ぐ":"ふせぐ","通す":"とおす","切る":"きる",
+ "曲げる":"まげる","納める":"おさめる","収める":"おさめる","収納":"しゅうのう","保護":"ほご","保持":"ほじ",
+ "固定":"こてい","接合":"せつごう","接続":"せつぞく","補強":"ほきょう","取り付ける":"とりつける","取り付け":"とりつけ","取付":"とりつけ",
+ "取っ手":"とって","取手":"とって","部材":"ぶざい","部品":"ぶひん","座金":"ざがね","座面":"ざめん","座ぐり":"ざぐり","面圧":"めんあつ",
+ "面一":"つらいち","分散":"ぶんさん","振動":"しんどう","軸":"じく","溝":"みぞ","薄板":"うすいた","鉄板":"てっぱん","薄物":"うすもの",
+ "金属":"きんぞく","木ねじ":"もくねじ","木ダボ":"もくだぼ","木枠":"きわく","木材":"もくざい","木造":"もくぞう","木工":"もっこう","樹脂":"じゅし",
+ "壁":"かべ","床":"ゆか","天井":"てんじょう","間柱":"まばしら","柱":"はしら","下地":"したじ","中空":"ちゅうくう","石膏":"せっこう",
+ "下穴":"したあな","穴":"あな","配管":"はいかん","配線":"はいせん","電線":"でんせん","電気":"でんき","端子":"たんし","端末":"たんまつ",
+ "結束":"けっそく","連結":"れんけつ","係留":"けいりゅう","荷重":"かじゅう","使用":"しよう","玉掛け":"たまがけ","扉":"とびら","蓋":"ふた",
+ "開閉":"かいへい","蝶番":"ちょうつがい","蝶":"ちょう","棚板":"たないた","棚":"たな","可動":"かどう","移動":"いどう","車輪":"しゃりん",
+ "台車":"だいしゃ","滑り止め":"すべりどめ","高さ":"たかさ","調整":"ちょうせい","水平面":"すいへいめん","水平":"すいへい","隙間":"すきま",
+ "耐震":"たいしん","梁":"はり","桁":"けた","土台":"どだい","仕口":"しぐち","出隅":"でずみ","筋交い":"すじかい","筋かい":"すじかい",
+ "基礎":"きそ","釘":"くぎ","仕上げ":"しあげ","戸締り":"とじまり","施錠":"せじょう","鍵":"かぎ","錠前":"じょうまえ","錠":"じょう",
+ "落とし":"おとし","額縁":"がくぶち","額":"がく","鎖":"くさり","漏れ":"もれ","工具":"こうぐ","専用":"せんよう","圧着":"あっちゃく",
+ "強度":"きょうど","区分":"くぶん","材質":"ざいしつ","規格":"きかく","種類":"しゅるい","長さ":"ながさ","呼び":"よび","板厚":"いたあつ",
+ "本体":"ほんたい","先端":"せんたん","頭":"あたま","羽根":"はね","半円":"はんえん","金物":"かなもの","金具":"かなぐ","建具":"たてぐ","建築":"けんちく",
+ "母屋":"もや","波板":"なみいた","折板":"せっぱん","屋根":"やね","網":"あみ","布":"ぬの","断熱材":"だんねつざい","軽天":"けいてん","変形":"へんけい",
+ "隅":"すみ","空回り":"からまわり","脱落":"だつらく","拡張":"かくちょう","重量物":"じゅうりょうぶつ","重量":"じゅうりょう","軽量":"けいりょう","中量":"ちゅうりょう",
+ "重い":"おもい","軽い":"かるい","厚い":"あつい","薄い":"うすい","硬い":"かたい","丸棒":"まるぼう","丸":"まる","物":"もの","用途":"ようと",
+ "輪":"わ","環":"かん","管":"くだ","脚":"あし","足":"あし","面":"めん","板":"いた","木":"き","水栓":"すいせん","継":"つぎ",
+};
+const READING_KEYS=Object.keys(READINGS).sort((a,b)=>b.length-a.length);
+const FURI_MAX=READING_KEYS.length?READING_KEYS[0].length:1;
+let furiOn=true, zhOn=true;
+function furigana(text){
+  if(!furiOn||!text) return text||"";
+  let out="",i=0;
+  while(i<text.length){
+    let hit=null;
+    for(let L=Math.min(FURI_MAX,text.length-i);L>=1;L--){
+      const sub=text.substr(i,L);
+      if(READINGS[sub]){hit=sub;break;}
+    }
+    if(hit){out+=`<ruby>${hit}<rt>${READINGS[hit]}</rt></ruby>`;i+=hit.length;}
+    else{out+=text[i];i++;}
+  }
+  return out;
+}
+function zhLine(p){return (zhOn&&p.zh)?`<div class="zh">🇨🇳 ${p.zh}</div>`:"";}
+function refreshAll(){
+  if(typeof renderTiles==="function") renderTiles();
+  if(typeof renderSearch==="function") renderSearch();
+  if(typeof stack!=="undefined" && stack.length && typeof renderFlow==="function") renderFlow();
+  if(typeof quiz!=="undefined" && quiz.cur && !quiz.answered && typeof renderQuiz==="function") renderQuiz();
+}
+
 /* =========================================================
    2) 用途診断ツリー（多段対応）
       node = { q, hint?, opts:[ {ol, od, recs?|next?} ] }
@@ -997,8 +1093,10 @@ function shopQ(p){
 }
 function cardHTML(p,why,tokens){
   const aliases=(p.aliases||[]).slice(0,6).map(a=>`<span class="tag">${a}</span>`).join("");
-  const whyHTML=why?`<p class="why">💡 ${why}</p>`:"";
-  const hi=t=>tokens?highlight(t,tokens):t;
+  const whyHTML=why?`<p class="why">💡 ${furigana(why)}</p>`:"";
+  const has=tokens&&tokens.length;
+  const hi=t=>has?highlight(t,tokens):t;            // 名前：検索語があるときのみハイライト
+  const tx=t=>has?highlight(t,tokens):furigana(t);  // 本文：検索時ハイライト/それ以外はふりがな
   const q=shopQ(p);
   const actions=`<div class="actions">
       <a class="shopbtn primary" href="https://www.cainz.com/search?q=${q}" target="_blank" rel="noopener noreferrer">🛒 カインズで見る</a>
@@ -1009,9 +1107,10 @@ function cardHTML(p,why,tokens){
     <div class="cbody">
       <h3><span>${hi(p.name)}</span><span class="yomi">${p.yomi}</span>
           <span class="catbadge cat-${p.cat}">${CATLABEL[p.cat]}</span></h3>
+      ${zhLine(p)}
       ${whyHTML}
-      <p class="desc">${hi(p.desc)}</p>
-      <p class="uses"><b>用途：</b>${hi(p.uses)}</p>
+      <p class="desc">${tx(p.desc)}</p>
+      <p class="uses"><b>用途：</b>${tx(p.uses)}</p>
       ${specTable(p)}
       <div class="tags">${aliases}</div>
       ${actions}
@@ -1029,12 +1128,15 @@ const elFlowBody=document.getElementById("flowBody");
 const elCrumb=document.getElementById("crumbPath");
 let stack=[]; // [{title, node?|recs?}]
 
-elIntentGrid.innerHTML=INTENTS.map((it,i)=>
-  `<div class="tile" data-i="${i}">
-     <span class="ic">${it.ic}</span><span class="tl">${it.label}</span><span class="sb">${it.sub}</span>
-   </div>`).join("");
-elIntentGrid.querySelectorAll(".tile").forEach(t=>
-  t.addEventListener("click",()=>{const it=INTENTS[+t.dataset.i];stack=[{title:it.label,node:it.root}];renderFlow();}));
+function renderTiles(){
+  elIntentGrid.innerHTML=INTENTS.map((it,i)=>
+    `<div class="tile" data-i="${i}">
+       <span class="ic">${it.ic}</span><span class="tl">${furigana(it.label)}</span><span class="sb">${furigana(it.sub)}</span>
+     </div>`).join("");
+}
+renderTiles();
+elIntentGrid.addEventListener("click",e=>{const t=e.target.closest(".tile");if(!t)return;
+  const it=INTENTS[+t.dataset.i];stack=[{title:it.label,node:it.root}];renderFlow();});
 
 function renderFlow(){
   elGuideTop.classList.add("hidden");
@@ -1047,11 +1149,11 @@ function renderFlow(){
       +cur.recs.map(r=>cardHTML(byId(r.id),r.why)).join("");
   }else{ // 質問
     const n=cur.node;
-    elFlowBody.innerHTML=`<div class="qtitle">${n.q}</div>`
-      +(n.hint?`<p class="qhint">${n.hint}</p>`:"")
+    elFlowBody.innerHTML=`<div class="qtitle">${furigana(n.q)}</div>`
+      +(n.hint?`<p class="qhint">${furigana(n.hint)}</p>`:"")
       +`<div class="opts">`+n.opts.map((o,i)=>
         `<div class="opt" data-i="${i}">
-           <span><span class="ol">${o.ol}</span>${o.od?`<div class="od">${o.od}</div>`:""}</span>
+           <span><span class="ol">${furigana(o.ol)}</span>${o.od?`<div class="od">${furigana(o.od)}</div>`:""}</span>
            <span class="arrow">→</span>
          </div>`).join("")+`</div>`;
     elFlowBody.querySelectorAll(".opt").forEach(op=>op.addEventListener("click",()=>{
@@ -1149,11 +1251,12 @@ function renderQuiz(){
   if(type==="B"){
     prompt=`<div class="qprompt">これは何という金物？</div>
       <div class="qbigill">${illusHTML(target)}</div>
-      <div class="qyomi">ヒント：${target.uses}</div>`;
+      <div class="qyomi">ヒント：${furigana(target.uses)}</div>`;
     optsHTML=`<div class="qopts names">`+opts.map((p,i)=>`<div class="qopt" data-i="${i}">${p.name}</div>`).join("")+`</div>`;
   }else{
     prompt=`<div class="qprompt">この金物はどれ？</div>
-      <div class="qword">${target.name}</div><div class="qyomi">${target.yomi}</div>`;
+      <div class="qword">${target.name}</div><div class="qyomi">${target.yomi}</div>`
+      +(zhOn&&target.zh?`<div class="qzh">🇨🇳 ${target.zh}</div>`:"");
     optsHTML=`<div class="qopts imgs">`+opts.map((p,i)=>`<div class="qopt imgopt" data-i="${i}">${illusHTML(p)}</div>`).join("")+`</div>`;
   }
   elQuiz.innerHTML=`<div id="qbar">${quizBar()}</div><div class="qcard">${prompt}${optsHTML}
@@ -1182,7 +1285,7 @@ function answerQuiz(i){
   });
   document.getElementById("qbar").innerHTML=quizBar();
   document.getElementById("qfb").innerHTML=(i<0?"🤔 答え：":(ok?"⭕ 正解！ ":"❌ 不正解 "))
-    +`<b>${target.name}</b>（${target.yomi}）— ${target.desc}`;
+    +`<b>${target.name}</b>（${target.yomi}）${target.zh?` ／ 🇨🇳 ${target.zh}`:""}<br>${furigana(target.desc)}`;
   document.getElementById("qskip").classList.add("hidden");
   document.getElementById("qnext").classList.remove("hidden");
 }
@@ -1195,6 +1298,13 @@ document.querySelectorAll(".modetab").forEach(tab=>tab.addEventListener("click",
   document.getElementById("mode-search").classList.toggle("hidden",m!=="search");
   document.getElementById("mode-quiz").classList.toggle("hidden",m!=="quiz");
   if(m==="quiz"&&!quiz.cur)newQuestion();}));
+
+/* ====== 言語トグル（ふりがな / 中文）====== */
+document.querySelectorAll(".langtog").forEach(t=>t.addEventListener("click",()=>{
+  if(t.dataset.tog==="furi"){furiOn=!furiOn;t.classList.toggle("on",furiOn);}
+  else{zhOn=!zhOn;t.classList.toggle("on",zhOn);}
+  refreshAll();
+}));
 
 document.getElementById("count").textContent=DB.length;
 renderSearch();
