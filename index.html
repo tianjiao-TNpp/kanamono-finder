@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五金件さがし | 用途から金物を見つける</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171f29; --panel2:#1e2935; --line:#2b3947;
+    --txt:#e8edf2; --sub:#9fb0c0; --accent:#4ea1ff; --accent2:#ffb454;
+    --chip:#22303d; --good:#46c98b; --shadow:0 4px 20px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:linear-gradient(180deg,#0c1116,#0f1419 40%);
+    color:var(--txt);
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+    line-height:1.6; min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:20px 16px 80px}
+  header h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:.02em}
+  header p{margin:0;color:var(--sub);font-size:.9rem}
+  .accent{color:var(--accent)}
+
+  .modetabs{display:flex;gap:8px;margin:16px 0 8px}
+  .modetab{flex:1;text-align:center;background:var(--panel);border:1px solid var(--line);
+    color:var(--sub);border-radius:12px;padding:12px;cursor:pointer;font-size:1rem;font-weight:600}
+  .modetab.active{background:var(--accent);border-color:var(--accent);color:#06121f}
+
+  .lead{color:var(--sub);font-size:.92rem;margin:8px 2px 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 14px;cursor:pointer;transition:.15s;text-align:left}
+  .tile:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .tile .ic{font-size:1.5rem;display:block;margin-bottom:6px}
+  .tile .tl{font-weight:700;font-size:1rem}
+  .tile .sb{color:var(--sub);font-size:.8rem;margin-top:3px}
+
+  .crumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 2px 14px;font-size:.9rem;color:var(--sub)}
+  .crumb .path{color:var(--accent2);font-weight:600}
+  .backbtn{background:var(--panel2);border:1px solid var(--line);color:var(--sub);
+    border-radius:10px;padding:6px 14px;cursor:pointer;font-size:.88rem}
+  .backbtn:hover{color:var(--txt)}
+  .qtitle{font-size:1.2rem;font-weight:700;margin:6px 2px 8px}
+  .qhint{color:var(--sub);font-size:.82rem;margin:0 2px 14px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;cursor:pointer;transition:.15s;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .opt:hover{border-color:var(--accent);background:var(--panel2)}
+  .opt .ol{font-weight:600}
+  .opt .od{color:var(--sub);font-size:.82rem;margin-top:2px}
+  .opt .arrow{color:var(--accent);font-size:1.2rem}
+
+  .searchrow{display:flex;gap:8px;margin-top:6px}
+  input[type=text]{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+    border-radius:12px;padding:14px 16px;font-size:1.05rem;outline:none}
+  input[type=text]:focus{border-color:var(--accent)}
+  button.clear{background:var(--panel2);border:1px solid var(--line);color:var(--sub);
+    border-radius:12px;padding:0 16px;font-size:.95rem;cursor:pointer}
+  button.clear:hover{color:var(--txt)}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{background:var(--chip);border:1px solid var(--line);color:var(--sub);
+    border-radius:999px;padding:6px 14px;font-size:.85rem;cursor:pointer;user-select:none;transition:.15s}
+  .chip:hover{color:var(--txt)}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:700}
+
+  .meta{color:var(--sub);font-size:.85rem;margin:18px 2px 8px}
+
+  /* cards */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .cardrow{display:flex;gap:14px;align-items:flex-start}
+  .illus{flex:0 0 78px;width:78px;height:78px;border-radius:10px;background:var(--panel2);
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--accent);overflow:hidden}
+  .illus img{width:100%;height:100%;object-fit:cover}
+  .ill{width:60px;height:60px}
+  .ill *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .cbody{flex:1;min-width:0}
+  .card h3{margin:0;font-size:1.15rem;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .yomi{color:var(--sub);font-size:.78rem;font-weight:400}
+  .catbadge{font-size:.7rem;padding:3px 9px;border-radius:6px;font-weight:700;white-space:nowrap}
+  .cat-fas{background:#1d3a52;color:#7cc4ff}
+  .cat-bld{background:#3a2d18;color:#ffc97a}
+  .cat-pipe{background:#143a2f;color:#6fe0b0}
+  .cat-gen{background:#33283f;color:#cfa6ff}
+  .why{margin:8px 0 4px;background:rgba(255,180,84,.12);border-left:3px solid var(--accent2);
+    border-radius:0 8px 8px 0;padding:7px 11px;color:#ffd9a0;font-size:.9rem}
+  .desc{margin:7px 0 6px;color:#d4dde6;font-size:.93rem}
+  .uses{margin:0 0 8px;color:var(--sub);font-size:.86rem}
+  .uses b{color:var(--good);font-weight:600}
+  table.spec{border-collapse:collapse;width:100%;font-size:.82rem;margin:2px 0 8px}
+  table.spec th{text-align:left;color:var(--accent);font-weight:600;white-space:nowrap;
+    padding:3px 10px 3px 0;vertical-align:top;width:1%}
+  table.spec td{color:#cdd8e2;padding:3px 0;vertical-align:top}
+  table.spec tr+tr th,table.spec tr+tr td{border-top:1px solid var(--line)}
+  .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+  .tag{background:var(--panel2);border:1px solid var(--line);color:var(--sub);
+    border-radius:6px;padding:2px 8px;font-size:.74rem}
+  mark{background:rgba(255,180,84,.28);color:#ffd9a0;border-radius:3px;padding:0 2px}
+
+  .examples{margin-top:12px;color:var(--sub);font-size:.82rem}
+  .examples b{color:var(--txt);font-weight:600}
+  .ex{display:inline-block;background:transparent;border:1px dashed var(--line);
+    color:var(--accent);border-radius:8px;padding:3px 9px;margin:3px 4px 0 0;cursor:pointer;font-size:.82rem}
+  .ex:hover{background:var(--panel)}
+  .empty{text-align:center;color:var(--sub);padding:40px 10px}
+  .hidden{display:none}
+  footer{margin-top:30px;color:#56697a;font-size:.78rem;text-align:center}
+  @media(max-width:520px){.illus{flex-basis:62px;width:62px;height:62px}.ill{width:46px;height:46px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🔩 五金件さがし</h1>
+    <p>部品の名前が分からなくてもOK。<span class="accent">「何をしたいか」</span>から金物を見つけます。</p>
+  </header>
+
+  <div class="modetabs">
+    <div class="modetab active" data-mode="guide">🧭 用途から探す</div>
+    <div class="modetab" data-mode="search">🔍 キーワード検索</div>
+  </div>
+
+  <!-- ========== 用途から探す ========== -->
+  <section id="mode-guide">
+    <div id="guideTop">
+      <p class="lead">やりたいことを選んでください。（客先で「○○したいんだけど…」の○○）</p>
+      <div class="grid" id="intentGrid"></div>
+    </div>
+    <div id="guideFlow" class="hidden">
+      <div class="crumb">
+        <button class="backbtn" id="backBtn">← 戻る</button>
+        <button class="backbtn" id="topBtn">最初から</button>
+        <span class="path" id="crumbPath"></span>
+      </div>
+      <div id="flowBody"></div>
+    </div>
+  </section>
+
+  <!-- ========== キーワード検索 ========== -->
+  <section id="mode-search" class="hidden">
+    <div class="searchrow">
+      <input type="text" id="q" placeholder="例：緩み止め／石膏ボード／ホース 締める" autocomplete="off">
+      <button class="clear" id="clear">クリア</button>
+    </div>
+    <div class="filters" id="filters">
+      <span class="chip active" data-cat="all">すべて</span>
+      <span class="chip" data-cat="fas">締結部品</span>
+      <span class="chip" data-cat="bld">建築・家具金物</span>
+      <span class="chip" data-cat="pipe">配管・電設金物</span>
+      <span class="chip" data-cat="gen">汎用</span>
+    </div>
+    <div class="examples">
+      <b>例：</b>
+      <span class="ex">緩み止め</span><span class="ex">石膏ボード</span><span class="ex">木 つなぐ</span>
+      <span class="ex">ホース 締める</span><span class="ex">引き出し レール</span><span class="ex">高さ 調整</span>
+    </div>
+    <div class="meta" id="meta"></div>
+    <div id="results"></div>
+  </section>
+
+  <footer>
+    収録 <span id="count"></span> 件 ・ 単体HTML / オフライン動作 ・ サイズ・荷重は一般的な目安です。最終選定は耐荷重・材質・規格をご確認ください。
+  </footer>
+</div>
+
+<script>
+/* =========================================================
+   0) イラスト（インラインSVG模式図）
+      p.img を設定すれば実写真に差し替え可能（images/xxx.jpg）
+   ========================================================= */
+const ICONS={
+ bolt:`<polygon points="16,9 32,9 40,18 32,27 16,27 8,18"/><rect x="38" y="14" width="6" height="8" transform="translate(-2)"/><rect x="38" y="15" width="6" height="6"/>`,
+ boltH:`<polygon points="6,12 14,8 22,12 22,24 14,28 6,24"/><rect x="22" y="14" width="20" height="8"/><path d="M27 14v8M32 14v8M37 14v8"/>`,
+ capbolt:`<rect x="6" y="11" width="13" height="14"/><polygon points="9,15 12.5,13 16,15 16,21 12.5,23 9,21"/><rect x="19" y="14" width="23" height="8"/><path d="M24 14v8M29 14v8M34 14v8M39 14v8"/>`,
+ nut:`<polygon points="16,9 32,9 40,22 32,35 16,35 8,22"/><circle cx="24" cy="22" r="8"/>`,
+ locknut:`<polygon points="16,12 32,12 40,24 32,36 16,36 8,24"/><circle cx="24" cy="24" r="7"/><path d="M16 12c2-4 14-4 16 0" stroke-dasharray="2 2"/>`,
+ washer:`<circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="7"/>`,
+ springwasher:`<circle cx="24" cy="22" r="15"/><circle cx="24" cy="22" r="7"/><path d="M22 35l5 5M19 33l5 5"/>`,
+ panscrew:`<path d="M14 17a10 9 0 0 1 20 0z"/><path d="M16 12h16"/><path d="M19 17l1 16 4 7 4-7 1-16"/><path d="M20 22h8M21 27h6M22 32h4"/>`,
+ flatscrew:`<path d="M13 13h22l-5 7H18z"/><path d="M18 20l1 14 5 6 5-6 1-14"/><path d="M20 25h8M21 30h6"/>`,
+ trussscrew:`<path d="M9 17a15 8 0 0 1 30 0z"/><path d="M18 17l1 15 5 6 5-6 1-15"/><path d="M20 23h8M21 28h6"/>`,
+ tapscrew:`<path d="M16 12h16"/><path d="M19 12v17l5 9 5-9V12"/><path d="M19 16l10 3M19 21l10 3M19 26l10 3"/>`,
+ woodscrew:`<path d="M13 13h22l-5 6H18z"/><path d="M18 19v12l6 10 6-10V19"/><path d="M18 23l12 3M18 28l12 3M18 33l12 3"/>`,
+ anchorbolt:`<rect x="20" y="6" width="8" height="6"/><rect x="21" y="12" width="6" height="20"/><path d="M21 12h6M21 17h6M21 22h6"/><path d="M21 32l-3 9M27 32l3 9M19 37h10"/>`,
+ wallplug:`<path d="M18 9h12l-2 25-4 5-4-5z"/><path d="M18 15h12M18 21h12M18 27h11M24 9v30"/>`,
+ boardanchor:`<path d="M14 6v36"/><rect x="14" y="19" width="13" height="9"/><path d="M27 23.5h6"/><path d="M27 19l9-4M27 28l9 4"/>`,
+ wingbolt:`<path d="M13 17c-7-7-11 4-2 7M35 17c7-7 11 4 2 7"/><circle cx="24" cy="20" r="5"/><rect x="21" y="23" width="6" height="17"/><path d="M21 28h6M21 33h6M21 38h6"/>`,
+ wingnut:`<path d="M15 23c-7-7-11 4-2 7M33 23c7-7 11 4 2 7"/><circle cx="24" cy="26" r="8"/><circle cx="24" cy="26" r="3"/>`,
+ stud:`<rect x="9" y="20" width="30" height="8"/><path d="M13 20v8M17 20v8M21 20v8M25 20v8M29 20v8M33 20v8M37 20v8"/>`,
+ insertnut:`<rect x="14" y="11" width="20" height="26"/><path d="M14 11l-3 3M14 17l-3 3M14 23l-3 3M14 29l-3 3M34 11l3 3M34 17l3 3M34 23l3 3M34 29l3 3"/><path d="M20 18h8M20 24h8M20 30h8"/>`,
+ rivet:`<path d="M24 6v18"/><path d="M16 24h16l-2 12-6 5-6-5z"/><path d="M16 29h16"/>`,
+ ering:`<path d="M35 13a15 15 0 1 0 0 22"/><path d="M25 18h-9M25 24h-13M25 30h-9"/>`,
+ splitpin:`<circle cx="24" cy="12" r="6"/><path d="M22 16c-2 8-3 16-5 24M26 16c2 8 3 16 5 24"/>`,
+ hinge:`<rect x="8" y="10" width="13" height="28"/><rect x="27" y="10" width="13" height="28"/><path d="M24 8v32"/><circle cx="24" cy="16" r="2"/><circle cx="24" cy="24" r="2"/><circle cx="24" cy="32" r="2"/>`,
+ slidehinge:`<circle cx="14" cy="24" r="8"/><path d="M22 20h13v8H22"/><rect x="35" y="13" width="6" height="22"/>`,
+ lbracket:`<path d="M12 8h7v21h21v7H12z"/><circle cx="15.5" cy="15" r="1.6"/><circle cx="15.5" cy="23" r="1.6"/><circle cx="26" cy="32.5" r="1.6"/><circle cx="34" cy="32.5" r="1.6"/>`,
+ shelfbracket:`<path d="M12 8v32M12 36h28"/><path d="M14 14l22 22"/>`,
+ dowel:`<rect x="13" y="16" width="22" height="16" rx="7"/><path d="M19 16v16M24 16v16M29 16v16"/>`,
+ caster:`<rect x="12" y="8" width="24" height="6"/><path d="M18 14v5M30 14v5"/><circle cx="24" cy="31" r="10"/><circle cx="24" cy="31" r="3"/>`,
+ doorroller:`<path d="M10 14h28v8H10z"/><circle cx="24" cy="31" r="8"/><circle cx="24" cy="31" r="2"/><path d="M16 22v4M32 22v4"/>`,
+ drawerslide:`<rect x="6" y="15" width="36" height="6"/><rect x="10" y="24" width="34" height="6"/><circle cx="14" cy="18" r="1.4"/><circle cx="34" cy="18" r="1.4"/><circle cx="18" cy="27" r="1.4"/><circle cx="38" cy="27" r="1.4"/>`,
+ handle:`<path d="M12 32V20a12 8 0 0 1 24 0v12"/><circle cx="12" cy="34" r="2"/><circle cx="36" cy="34" r="2"/>`,
+ knob:`<circle cx="24" cy="19" r="12"/><rect x="20" y="31" width="8" height="9"/>`,
+ magnet:`<rect x="9" y="16" width="17" height="16" rx="2"/><path d="M14 16v16M21 16v16"/><rect x="31" y="20" width="8" height="8"/>`,
+ stay:`<circle cx="12" cy="13" r="3"/><circle cx="36" cy="35" r="3"/><path d="M14 15L34 33"/><rect x="19" y="19" width="11" height="6" rx="2" transform="rotate(42 24 24)"/>`,
+ kasugai:`<path d="M14 12h20"/><path d="M14 12v20l-3 5M34 12v20l3 5"/>`,
+ hook:`<path d="M24 9v13a8 8 0 1 1-8-8"/><circle cx="24" cy="9" r="2"/>`,
+ saddle:`<path d="M8 31v-5a16 16 0 0 1 32 0v5"/><path d="M3 31h13M32 31h13"/><circle cx="9" cy="31" r="1.6"/><circle cx="39" cy="31" r="1.6"/>`,
+ pipeclamp:`<circle cx="24" cy="21" r="13"/><path d="M24 34v8M20 38h8"/>`,
+ hoseclamp:`<circle cx="22" cy="25" r="13"/><circle cx="22" cy="25" r="9" stroke-dasharray="2 2"/><rect x="29" y="9" width="11" height="7"/>`,
+ cabletie:`<path d="M16 30a12 12 0 1 1 13 9"/><rect x="9" y="26" width="10" height="9" rx="2"/><path d="M28 38l9 3"/>`,
+ staple:`<path d="M14 36V18a10 8 0 0 1 20 0v18"/><path d="M8 26h32" stroke-dasharray="3 3"/>`,
+ eyebolt:`<circle cx="24" cy="14" r="8"/><circle cx="24" cy="14" r="3"/><rect x="21" y="22" width="6" height="18"/><path d="M21 27h6M21 32h6M21 37h6"/>`,
+ turnbuckle:`<rect x="16" y="14" width="16" height="20" rx="8"/><circle cx="24" cy="9" r="4"/><circle cx="24" cy="39" r="4"/>`,
+ shackle:`<path d="M16 13v7a8 10 0 0 0 16 0v-7"/><path d="M11 13h11M26 13h11"/><circle cx="16.5" cy="13" r="1.5"/><circle cx="31.5" cy="13" r="1.5"/>`,
+ carabiner:`<rect x="14" y="8" width="20" height="32" rx="10"/><path d="M24 13v18"/>`,
+ wireclip:`<path d="M16 10v18a8 8 0 0 0 16 0V10"/><rect x="13" y="28" width="22" height="8"/><circle cx="16" cy="10" r="1.5"/><circle cx="32" cy="10" r="1.5"/>`,
+ crimp:`<circle cx="13" cy="24" r="8"/><circle cx="13" cy="24" r="3"/><rect x="21" y="20" width="10" height="8"/><path d="M31 20h11v8H31" stroke-dasharray="3 2"/>`,
+ adjuster:`<rect x="21" y="6" width="6" height="22"/><path d="M21 10h6M21 14h6M21 18h6M21 22h6"/><ellipse cx="24" cy="35" rx="14" ry="6"/>`,
+ rubberfoot:`<path d="M11 34a13 15 0 0 1 26 0z"/><path d="M11 34h26"/>`,
+ spacer:`<rect x="16" y="12" width="16" height="24"/><ellipse cx="24" cy="12" rx="8" ry="3"/><ellipse cx="24" cy="36" rx="8" ry="3"/><path d="M20 12v24M28 12v24"/>`,
+ pressnut:`<path d="M6 30h36"/><rect x="18" y="18" width="12" height="12"/><circle cx="24" cy="24" r="3"/><path d="M18 30v6M30 30v6"/>`,
+ capnut:`<polygon points="14,24 14,34 24,40 34,34 34,24"/><path d="M14 24a10 8 0 0 1 20 0"/>`,
+ sqnut:`<rect x="9" y="11" width="30" height="26"/><circle cx="24" cy="24" r="7"/>`,
+ longnut:`<rect x="17" y="7" width="14" height="34"/><path d="M17 7l-3 3M31 7l3 3M17 41l-3-3M31 41l3-3"/><path d="M21 14h6M21 24h6M21 34h6"/>`,
+ eyenut:`<circle cx="24" cy="15" r="8"/><circle cx="24" cy="15" r="3"/><polygon points="14,24 34,24 38,33 24,40 10,33"/>`,
+ setscrew:`<rect x="11" y="19" width="26" height="10"/><path d="M15 19v10M19 19v10M23 19v10M27 19v10M31 19v10"/><rect x="11" y="21" width="4" height="6"/>`,
+ ubolt:`<path d="M14 40V22a10 10 0 0 1 20 0v18"/><path d="M10 30h7M31 30h7M10 35h7M31 35h7"/>`,
+ jbolt:`<path d="M24 8v20a8 8 0 0 1-13 6"/><path d="M21 11h6M21 16h6M21 21h6"/>`,
+ toothwasher:`<circle cx="24" cy="24" r="14" stroke-dasharray="2 3"/><circle cx="24" cy="24" r="7"/>`,
+ sqwasher:`<rect x="9" y="9" width="30" height="30"/><circle cx="24" cy="24" r="6"/>`,
+ nail:`<path d="M14 12h20"/><path d="M24 12v22l-1 6"/>`,
+ screwnail:`<path d="M14 12h20"/><path d="M24 12v22l-1 6"/><path d="M19 18h10M19 23h10M19 28h10"/>`,
+ finishnail:`<path d="M21 11h6"/><path d="M24 11v25l-1 5"/>`,
+ tackerstaple:`<path d="M14 38V16M34 38V16M14 16h20"/>`,
+ habo:`<rect x="14" y="8" width="11" height="26"/><circle cx="19.5" cy="13" r="1.6"/><circle cx="19.5" cy="22" r="1.6"/><circle cx="19.5" cy="29" r="1.6"/><path d="M25 20h8"/><rect x="29" y="17" width="9" height="7"/>`,
+ tanzaku:`<rect x="20" y="6" width="8" height="36"/><circle cx="24" cy="11" r="1.5"/><circle cx="24" cy="18" r="1.5"/><circle cx="24" cy="25" r="1.5"/><circle cx="24" cy="31" r="1.5"/><circle cx="24" cy="37" r="1.5"/>`,
+ kado:`<path d="M14 8v28h22v-7H21V8z"/><circle cx="17" cy="14" r="1.5"/><circle cx="17" cy="22" r="1.5"/><circle cx="28" cy="32.5" r="1.5"/>`,
+ vplate:`<path d="M9 36L24 10l15 26"/><path d="M9 36h30"/><circle cx="17" cy="27" r="1.5"/><circle cx="31" cy="27" r="1.5"/>`,
+ brace:`<path d="M12 38L36 12"/><path d="M7 33h10v9H7z"/><path d="M31 6h10v9H31z"/>`,
+ holddown:`<rect x="15" y="20" width="18" height="18"/><path d="M24 20V6"/><path d="M21 9h6M21 13h6"/><circle cx="20" cy="30" r="1.6"/><circle cx="28" cy="30" r="1.6"/>`,
+ hiuchi:`<path d="M8 8v12M8 8h12"/><path d="M12 12L36 36"/><path d="M30 36h8v-8"/>`,
+ shelfpost:`<rect x="18" y="6" width="12" height="36"/><path d="M22 10h4M22 14h4M22 18h4M22 22h4M22 26h4M22 30h4M22 34h4M22 38h4"/>`,
+ doorstop:`<rect x="13" y="30" width="22" height="8"/><path d="M19 30v-7a5 5 0 0 1 10 0v7"/>`,
+ hasp:`<rect x="7" y="20" width="18" height="9"/><path d="M25 24.5h9a5 5 0 0 0-5-9"/><circle cx="12" cy="24.5" r="1.6"/>`,
+ droprod:`<rect x="20" y="6" width="8" height="9"/><rect x="22" y="15" width="4" height="27"/><path d="M16 11h12"/>`,
+ lock:`<rect x="11" y="14" width="25" height="20" rx="2"/><circle cx="23" cy="22" r="3"/><path d="M23 25v5"/><rect x="33" y="22" width="6" height="4"/>`,
+ chain:`<ellipse cx="15" cy="15" rx="5" ry="7"/><ellipse cx="24" cy="24" rx="5" ry="7"/><ellipse cx="33" cy="33" rx="5" ry="7"/>`,
+ wirerope:`<path d="M7 22q8 -7 17 0t17 0"/><path d="M7 28q8 -7 17 0t17 0"/>`,
+ heavyhook:`<path d="M24 8v6"/><path d="M24 14c-10 0-13 17-1 20a8 8 0 0 0 7-12"/><path d="M21 11h6"/>`,
+ swivel:`<circle cx="24" cy="12" r="6"/><rect x="21" y="18" width="6" height="9"/><circle cx="24" cy="34" r="6"/>`,
+ ring:`<circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="10"/>`,
+ nasukan:`<path d="M18 16a7 7 0 1 1 0 14"/><path d="M18 16v14"/><rect x="22" y="20" width="9" height="6" rx="3"/><circle cx="34" cy="23" r="4"/>`,
+ sleeve:`<rect x="15" y="19" width="18" height="11" rx="2"/><path d="M20 19v11M24 19v11M28 19v11"/>`,
+ connector:`<rect x="11" y="15" width="26" height="20" rx="3"/><path d="M17 15V8M24 15V8M31 15V8"/>`,
+ hangband:`<circle cx="24" cy="29" r="11"/><path d="M24 18V6"/><path d="M20 9h8"/>`,
+ grommet:`<circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="10" stroke-dasharray="2 2"/>`,
+ bush:`<rect x="14" y="14" width="20" height="20" rx="5"/><circle cx="24" cy="24" r="5"/>`,
+ oring:`<circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="8"/>`,
+ velcro:`<rect x="8" y="13" width="32" height="8" rx="2"/><rect x="8" y="27" width="32" height="8" rx="2"/><path d="M13 13v-3M19 13v-3M25 13v-3M31 13v-3M37 13v-3"/>`,
+ tensionspring:`<path d="M8 24h4l3-7 4 14 4-14 4 14 3-7h4"/><circle cx="9" cy="24" r="2"/>`,
+ compspring:`<path d="M13 13v22M35 13v22"/><path d="M13 13h22M13 18h22M13 24h22M13 30h22M13 35h22"/>`,
+};
+function illusHTML(p){
+  if(p.img) return `<img src="${p.img}" alt="${p.name}">`;
+  return `<svg class="ill" viewBox="0 0 48 48">${ICONS[p.pic]||ICONS.bolt}</svg>`;
+}
+
+/* =========================================================
+   1) 部品データベース（pic=イラスト, spec=サイズ表）
+   ========================================================= */
+const CATLABEL={fas:"締結部品",bld:"建築・家具金物",pipe:"配管・電設金物",gen:"汎用"};
+const DB=[
+  {id:1,name:"六角ボルト",yomi:"ろっかくぼると",cat:"fas",pic:"boltH",aliases:["ボルト","hex bolt","六角頭"],
+   desc:"頭が六角形の最も標準的なボルト。ナットと組み合わせて部材を締結する。",uses:"鋼材・機械の一般締結、強度が必要な接合",
+   spec:[["ねじ径","M3〜M24（一般 M6/M8/M10）"],["長さ","10〜200mm"],["強度区分","4.8 / 8.8 / 10.9"],["材質","鉄(ユニクロ/三価)・SUS304/316"]],
+   tags:["ナットと組み合わせ","スパナで締める","強い締結","金属同士をつなぐ","貫通させて締める"]},
+  {id:2,name:"六角穴付きボルト",yomi:"ろっかくあなつきぼると",cat:"fas",pic:"capbolt",aliases:["キャップボルト","CAPスクリュー","cap screw","ソケットボルト","内六角"],
+   desc:"頭に六角の穴があり、六角レンチで締める。頭が小さく座ぐりに収まる。",uses:"機械部品、頭を埋め込みたい箇所、狭い場所の締結",
+   spec:[["ねじ径","M3〜M16"],["長さ","5〜100mm"],["工具","六角レンチ"],["材質","鉄(黒色酸化)・SUS"]],
+   tags:["六角レンチで締める","頭を埋め込む","座ぐり","すっきり納める","機械組み立て"]},
+  {id:3,name:"六角ナット",yomi:"ろっかくなっと",cat:"fas",pic:"nut",aliases:["ナット","hex nut"],
+   desc:"ボルトとねじ込んで使う六角形のナット。最も一般的なめねじ部品。",uses:"ボルトと対で締結する",
+   spec:[["ねじ径","M3〜M24"],["種類","1種/3種/フランジ付"],["材質","鉄・SUS・真鍮"]],
+   tags:["ボルトの相手","締め付け","ねじ込む"]},
+  {id:4,name:"ロックナット（ナイロンナット）",yomi:"ろっくなっと",cat:"fas",pic:"locknut",aliases:["ナイロンナット","ゆるみ止めナット","Uナット","nylock","緩み止めナット"],
+   desc:"内側のナイロンリングや構造で振動による緩みを防ぐナット。",uses:"振動する箇所、緩んでは困る箇所の締結",
+   spec:[["ねじ径","M3〜M20"],["種類","ナイロン入(Uナット)/オールメタル"],["注意","ナイロン入は使用温度〜約120℃"]],
+   tags:["緩み止め","ゆるみ防止","振動対策","緩まない","抜け止め"]},
+  {id:5,name:"平ワッシャー（平座金）",yomi:"ひらわっしゃー",cat:"fas",pic:"washer",aliases:["ワッシャー","平座金","flat washer"],
+   desc:"ボルト・ナットの下に敷き、接触面圧を分散して締結面を保護する。",uses:"締め付け面の保護、面圧分散、座面確保",
+   spec:[["呼び","M3〜M20 用"],["規格","JIS 小形/並形/大形"],["材質","鉄・SUS"]],
+   tags:["面を保護","座面を広げる","めり込み防止","下に敷く"]},
+  {id:6,name:"スプリングワッシャー（ばね座金）",yomi:"すぷりんぐわっしゃー",cat:"fas",pic:"springwasher",aliases:["ばね座金","spring washer","菊座"],
+   desc:"ばね作用で軸力を保ち、振動による緩みを抑える座金。",uses:"緩み止めの補助、ナットの下に入れる",
+   spec:[["呼び","M3〜M20 用"],["種類","2号(一般)"],["材質","鉄・SUS"]],
+   tags:["緩み止め","ゆるみ防止","振動対策","ナットの下"]},
+  {id:7,name:"なべ小ねじ",yomi:"なべこねじ",cat:"fas",pic:"panscrew",aliases:["なべねじ","pan head","プラスねじ","小ねじ"],
+   desc:"頭が丸く平らな最も汎用的な小ねじ。プラスドライバーで締める。",uses:"金属・樹脂部品の一般的なねじ留め(めねじ側必要)",
+   spec:[["ねじ径","M2〜M6"],["長さ","4〜40mm"],["十字","プラス No.1〜2"],["材質","鉄・SUS・真鍮"]],
+   tags:["ドライバーで締める","一般的なねじ","部品を留める","頭が出てよい"]},
+  {id:8,name:"皿小ねじ",yomi:"さらこねじ",cat:"fas",pic:"flatscrew",aliases:["皿ねじ","flat head","countersunk"],
+   desc:"頭が円錐形で、座ぐりに沈めて表面と面一にできるねじ。",uses:"頭を出したくない箇所、表面をフラットにしたい部品",
+   spec:[["ねじ径","M2.5〜M6"],["頭角","90°"],["長さ","5〜40mm"]],
+   tags:["頭を沈める","面一にする","出っ張らせない","フラットに仕上げる","引っかからない"]},
+  {id:9,name:"トラス小ねじ",yomi:"とらすこねじ",cat:"fas",pic:"trussscrew",aliases:["truss head","大頭ねじ"],
+   desc:"頭が低く径の大きい小ねじ。薄板や広い座面を押さえるのに向く。",uses:"薄板の固定、座面を広く取りたい箇所",
+   spec:[["ねじ径","M3〜M6"],["特徴","頭径がなべより大きい"]],
+   tags:["頭が大きい","薄板を押さえる","広く押さえる","頭が低い"]},
+  {id:10,name:"タッピングねじ",yomi:"たっぴんぐねじ",cat:"fas",pic:"tapscrew",aliases:["タッピング","self tapping","セルフタップ"],
+   desc:"自らねじ山を作りながら入るねじ。下穴だけ(または無し)で締結できる。",uses:"薄い金属板・樹脂への直接固定、めねじ加工不要",
+   spec:[["呼び","2〜6（φ2.2〜φ4.2）"],["種類","1種(尖り)/2種/3種"],["適用板厚","〜2mm程度（下穴径は板厚で調整）"]],
+   tags:["下穴だけ","めねじ不要","薄い金属板","樹脂に留める","自分でねじ山を作る","下穴なし"]},
+  {id:11,name:"木ねじ／コーススレッド",yomi:"もくねじ",cat:"fas",pic:"woodscrew",aliases:["木ネジ","コーススレッド","wood screw","ビス"],
+   desc:"木材用の粗目ねじ。ねじ込みが速く保持力が高い。コーススレッドはDIYの定番。",uses:"木材同士の接合、下地への固定",
+   spec:[["呼び","φ2.4〜φ5.1 / コース 3.3・3.8・4.2"],["長さ","12〜90mm"],["頭","皿/ラッパ"]],
+   tags:["木材に留める","木と木をつなぐ","DIY","下地に固定","ビス留め"]},
+  {id:12,name:"アンカーボルト",yomi:"あんかーぼると",cat:"fas",pic:"anchorbolt",aliases:["オールアンカー","芯棒打込み","concrete anchor","ケミカルアンカー"],
+   desc:"コンクリートに穴をあけて打ち込み、機器や柱脚を固定する金物。",uses:"コンクリート床・壁への重量物固定",
+   spec:[["呼び","M6〜M16（本体径 W3/8 等）"],["下穴","本体径に合わせて施工"],["対象","コンクリート（打込み式/芯棒打込み）"]],
+   tags:["コンクリートに固定","重い物を固定","床に据え付け","壁付け重量物"]},
+  {id:13,name:"アンカープラグ（カールプラグ）",yomi:"あんかーぷらぐ",cat:"fas",pic:"wallplug",aliases:["カールプラグ","樹脂プラグ","wall plug","プラグアンカー"],
+   desc:"コンクリート・モルタル壁の穴に挿し、ねじをねじ込むと開いて効く樹脂アンカー。",uses:"コンクリート・ブロック壁への軽中量物の固定",
+   spec:[["呼び","No.4〜No.10 / φ5〜φ12"],["対象","コンクリ・ブロック・モルタル"],["併用ねじ","木ねじ/タッピング"]],
+   tags:["コンクリート壁に留める","ブロック壁","軽い物を壁付け","下穴に挿す"]},
+  {id:14,name:"ボードアンカー",yomi:"ぼーどあんかー",cat:"fas",pic:"boardanchor",aliases:["石膏ボードアンカー","プラスターボードアンカー","トグラー","中空壁アンカー"],
+   desc:"石膏ボード(中空壁)裏で開いて保持するアンカー。下地が無い壁面に物を留められる。",uses:"石膏ボード壁への棚・額・小物の固定",
+   spec:[["対象板厚","9.5〜15mm 石膏ボード"],["許容荷重","1本 約5〜15kg（せん断・製品による）"],["種類","ねじ込み式/トグル式/金属拡張式"]],
+   tags:["石膏ボードに固定","下地がない壁","中空壁","ボード壁に棚","柱が無い場所に留める"]},
+  {id:15,name:"蝶ボルト",yomi:"ちょうぼると",cat:"fas",pic:"wingbolt",aliases:["ちょうボルト","wing bolt","手締めボルト","蝶ねじ"],
+   desc:"羽根状の頭で工具なしに手で回せるボルト。",uses:"頻繁に着脱する箇所、工具を使いたくない固定",
+   spec:[["ねじ径","M4〜M12"],["材質","鉄・SUS"]],
+   tags:["工具なしで締める","手で回す","よく外す","ワンタッチ"]},
+  {id:16,name:"蝶ナット",yomi:"ちょうなっと",cat:"fas",pic:"wingnut",aliases:["wing nut","手締めナット"],
+   desc:"羽根付きで手で回せるナット。蝶ボルト同様に工具不要。",uses:"頻繁に着脱、手締めしたい箇所",
+   spec:[["ねじ径","M4〜M12"],["材質","鉄・SUS"]],
+   tags:["工具なしで締める","手で回す","よく外す"]},
+  {id:17,name:"寸切りボルト（全ねじ）",yomi:"ずんぎりぼると",cat:"fas",pic:"stud",aliases:["全ねじ","長ねじ","ずん切り","threaded rod","スタッド"],
+   desc:"全長にねじが切られた棒。好きな長さに切ってナットで固定できる。",uses:"吊りボルト、長さ調整が必要な締結、つっぱり",
+   spec:[["ねじ径","M3〜M20（吊りは W3/8・M10 が定番）"],["長さ","1m（切断して使用）"],["材質","鉄(ユニクロ)・SUS"]],
+   tags:["長い棒","吊り下げる","好きな長さに切る","天井から吊る","つっぱり"]},
+  {id:18,name:"鬼目ナット（インサートナット）",yomi:"おにめなっと",cat:"fas",pic:"insertnut",aliases:["インサートナット","ジョイントコネクター","insert nut","埋め込みナット"],
+   desc:"木材に埋め込んで金属のめねじを作る部品。ボルトで繰り返し着脱できる。",uses:"木材を繰り返し分解・組立する家具、脚の取り付け",
+   spec:[["ねじ径","M4〜M10"],["下穴","製品指定（ねじ径＋数mm）"],["種類","打込み式/ねじ込み式(つば付)"]],
+   tags:["木材にめねじ","木に埋め込む","繰り返し着脱","家具を分解できる","脚を付ける"]},
+  {id:19,name:"ブラインドリベット",yomi:"ぶらいんどりべっと",cat:"fas",pic:"rivet",aliases:["リベット","ポップリベット","blind rivet","かしめ"],
+   desc:"片側からの作業で薄板同士をかしめ固定する。専用工具(リベッター)で施工。",uses:"裏側に手が届かない薄板の永久固定、板金",
+   spec:[["呼び","φ3.2 / φ4.0 / φ4.8"],["掴み代","板厚合計で選定"],["材質","アルミ/スチール/SUS"]],
+   tags:["片側だけで固定","薄板をかしめる","裏に手が届かない","外さない固定","板金"]},
+  {id:20,name:"止め輪（Eリング・C形）",yomi:"とめわ",cat:"fas",pic:"ering",aliases:["Eリング","C形止め輪","サークリップ","snap ring","軸用止め輪"],
+   desc:"軸の溝にはめて部品の抜け・移動を止めるリング。",uses:"軸上の部品(歯車・ベアリング)の抜け止め",
+   spec:[["呼び","軸径 φ3〜φ30 用"],["種類","E形/C形（軸用・穴用）"]],
+   tags:["軸の抜け止め","溝にはめる","部品の移動を止める"]},
+  {id:21,name:"割りピン",yomi:"わりぴん",cat:"fas",pic:"splitpin",aliases:["コッターピン","cotter pin","スプリットピン"],
+   desc:"穴に通して足を開き、ナットやピンの抜け・緩みを止める。",uses:"溝付きナットの緩み止め、ピンの抜け止め",
+   spec:[["呼び","φ1.6〜φ6.3"],["材質","鉄・SUS"]],
+   tags:["抜け止め","緩み止め","足を開く","ナットの脱落防止"]},
+
+  {id:30,name:"蝶番（丁番・ヒンジ）",yomi:"ちょうつがい",cat:"bld",pic:"hinge",aliases:["丁番","ヒンジ","平蝶番","hinge","旗丁番"],
+   desc:"扉やフタを回転可能に連結する基本金物。",uses:"ドア・扉・蓋の開閉軸",
+   spec:[["全長","51 / 64 / 76 / 89mm 等"],["種類","平/抜き差し/旗"],["材質","SUS・鉄・真鍮"]],
+   tags:["扉を開閉","フタをつける","回転させる","ドアの取り付け"]},
+  {id:31,name:"スライド蝶番（隠し丁番）",yomi:"すらいどちょうばん",cat:"bld",pic:"slidehinge",aliases:["スライド丁番","キャビネットヒンジ","concealed hinge","かぶせ丁番"],
+   desc:"扉を閉じると外から見えない、キャビネット用の調整機構付きヒンジ。",uses:"システムキッチン・収納扉のかぶせ開き",
+   spec:[["カップ径","φ35（一般）/ φ26"],["かぶせ","全かぶせ/半かぶせ/インセット"],["機能","ワンタッチ脱着・ソフトクローズ有"]],
+   tags:["扉が隠れる","収納の扉","外から見えない","調整できる","かぶせ扉"]},
+  {id:32,name:"L字金具（アングル）",yomi:"えるじかなぐ",cat:"bld",pic:"lbracket",aliases:["L金具","アングル","補強金具","corner brace","隅金"],
+   desc:"直角に部材を接合・補強するL形の金具。",uses:"棚・木枠の直角補強、ぐらつき防止",
+   spec:[["サイズ","30〜120mm"],["板厚","1.6〜3.0mm"],["材質","ユニクロ/SUS/黒"]],
+   tags:["直角につなぐ","補強する","ぐらつき防止","角を固定","木枠を強く"]},
+  {id:33,name:"棚受け（ブラケット）",yomi:"たなうけ",cat:"bld",pic:"shelfbracket",aliases:["ブラケット","棚受金具","shelf bracket","アングル棚受"],
+   desc:"壁に棚板を水平に支持させる金具。",uses:"壁付け棚の支持",
+   spec:[["奥行","100〜400mm"],["耐荷重","目安 1本 10〜40kg（製品による）"]],
+   tags:["棚を支える","壁に棚","棚板を載せる","水平に支持"]},
+  {id:34,name:"木ダボ",yomi:"もくだぼ",cat:"bld",pic:"dowel",aliases:["ダボ","ダボ継ぎ","dowel","棚ダボ","ダボピン"],
+   desc:"木材同士の位置決め・接合や、棚板を載せる小さな丸棒/ピン。",uses:"板の接ぎ合わせ、可動棚の受け",
+   spec:[["径","φ6 / φ8 / φ10"],["長さ","20〜40mm"],["材質","ブナ材(溝付)/金属(棚ダボ)"]],
+   tags:["木材をつなぐ","位置決め","棚板を載せる","可動棚","見えない接合"]},
+  {id:35,name:"キャスター",yomi:"きゃすたー",cat:"bld",pic:"caster",aliases:["車輪","caster","自在キャスター","ストッパー付"],
+   desc:"家具や台車を移動できるようにする車輪付き金具。",uses:"台車・ワゴン・家具の移動",
+   spec:[["車輪径","25〜100mm"],["耐荷重","1個 約10〜80kg"],["種類","自在/固定/ストッパー付"]],
+   tags:["移動できる","車輪をつける","転がす","台車","ストッパー"]},
+  {id:36,name:"戸車",yomi:"とぐるま",cat:"bld",pic:"doorroller",aliases:["とぐるま","door roller","引戸車"],
+   desc:"引き戸の下部に付け、レール上を滑らかに走らせる小車輪。",uses:"引き戸・サッシの開閉",
+   spec:[["車径","φ20〜φ40"],["形状","V型/U型/丸型（レール形状に合わせる）"]],
+   tags:["引き戸","レールを走る","滑らかに開閉","建具"]},
+  {id:37,name:"スライドレール",yomi:"すらいどれーる",cat:"bld",pic:"drawerslide",aliases:["引き出しレール","drawer slide","ベアリングレール"],
+   desc:"引き出しを滑らかに前後させるレール。",uses:"引き出し・収納の出し入れ",
+   spec:[["長さ","250〜600mm"],["引出量","2段(3/4)/3段(フルスライド)"],["耐荷重","約12〜50kg/ペア"]],
+   tags:["引き出しレール","スムーズに出し入れ","収納を引き出す","フルスライド"]},
+  {id:38,name:"取手・ハンドル",yomi:"とって",cat:"bld",pic:"handle",aliases:["ハンドル","取っ手","handle","把手"],
+   desc:"扉・引き出しを開けるための握り金具。",uses:"家具・建具の操作部",
+   spec:[["取付ピッチ","64 / 96 / 128 / 160mm"],["材質","アルミ・SUS・鉄"]],
+   tags:["持つ場所","つかむ","引く","握り"]},
+  {id:39,name:"つまみ（ノブ）",yomi:"つまみ",cat:"bld",pic:"knob",aliases:["ノブ","knob","ツマミ"],
+   desc:"指でつまんで開ける小型の取手。",uses:"小扉・引き出しの操作",
+   spec:[["径","φ15〜φ35"],["取付","M4 ねじ"]],
+   tags:["指でつまむ","小さい取手","引き出しのノブ"]},
+  {id:40,name:"マグネットキャッチ",yomi:"まぐねっときゃっち",cat:"bld",pic:"magnet",aliases:["磁石キャッチ","magnetic catch","扉キャッチ"],
+   desc:"磁石で扉を閉じた位置に保持する金具。",uses:"開き扉が勝手に開かないようにする",
+   spec:[["吸着力","約2〜6kg"],["取付","ねじ止め"]],
+   tags:["扉を閉じておく","勝手に開かない","磁石で留める","パチンと閉まる"]},
+  {id:41,name:"ステー（開き止め・ダンパー）",yomi:"すてー",cat:"bld",pic:"stay",aliases:["ダンパーステー","stay","フラップステー","ソフトダウン"],
+   desc:"上開き・横開きの扉を任意角度で保持、またはゆっくり閉じる金具。",uses:"跳ね上げ扉、上蓋をその位置で止める",
+   spec:[["種類","ソフトダウン/フリーストップ/横開き"],["左右","左右の別あり（要確認）"]],
+   tags:["扉を開けたまま止める","フタを支える","ゆっくり閉じる","跳ね上げ","角度を保持"]},
+  {id:42,name:"かすがい",yomi:"かすがい",cat:"bld",pic:"kasugai",aliases:["鎹","staple cramp"],
+   desc:"両端を曲げた金物を2つの木材に打ち込み、引き離れを防ぐ。",uses:"木材同士の連結・ずれ止め(土木・木工)",
+   spec:[["長さ","75〜150mm"],["材質","鉄(黒)"]],
+   tags:["木材を連結","打ち込む","引き離れ防止","2つをつなぐ"]},
+  {id:43,name:"フック（壁掛け）",yomi:"ふっく",cat:"bld",pic:"hook",aliases:["hook","掛け金具","ねじフック","ヒートン"],
+   desc:"物を引っ掛けるための金具。ねじ込み式や両面テープ式がある。",uses:"壁・天井からの吊り下げ、引っ掛け収納",
+   spec:[["種類","ねじ込み(ヒートン)/L字/両面テープ"],["耐荷重","製品による"]],
+   tags:["引っ掛ける","吊るす","壁掛け","フックで収納"]},
+
+  {id:60,name:"サドルバンド",yomi:"さどるばんど",cat:"pipe",pic:"saddle",aliases:["サドル","片サドル","両サドル","saddle band","配管サドル"],
+   desc:"パイプや配線を壁・天井に沿わせて固定する半円形のバンド。",uses:"配管・電線管の壁付け固定",
+   spec:[["呼び","適合管径で選定（VE16〜 / φ）"],["種類","片サドル/両サドル"],["材質","鉄・SUS・樹脂"]],
+   tags:["配管を壁に留める","パイプを固定","電線管を固定","壁に沿わせる"]},
+  {id:61,name:"立てバンド／パイプクランプ",yomi:"たてばんど",cat:"pipe",pic:"pipeclamp",aliases:["立バンド","パイプクランプ","pipe clamp","吊りバンド"],
+   desc:"配管を1周巻いて固定するバンド。吊り・支持に使う。",uses:"配管の支持・吊り下げ",
+   spec:[["呼び","管径（15A・20A… / φ）"],["材質","鉄・SUS"]],
+   tags:["配管を一周締める","パイプを吊る","しっかり固定","支持金具"]},
+  {id:62,name:"ホースバンド（ホースクランプ）",yomi:"ほーすばんど",cat:"pipe",pic:"hoseclamp",aliases:["ホースクランプ","hose clamp","締付バンド"],
+   desc:"ホースを継手に締め付けて抜け・漏れを防ぐ金属バンド。ねじで径を調整。",uses:"ホースと継手の接続部の締結",
+   spec:[["締付径","φ8〜φ50 等（幅広展開）"],["種類","ウォームギア式/オートクランプ"],["材質","SUS/鉄"]],
+   tags:["ホースを締める","抜け止め","漏れ防止","径を調整して締める","ゴムホース固定"]},
+  {id:63,name:"ケーブルタイ（結束バンド）",yomi:"けーぶるたい",cat:"pipe",pic:"cabletie",aliases:["結束バンド","インシュロック","タイラップ","cable tie"],
+   desc:"配線などを束ねて締める樹脂バンド。ワンウェイで締め込む。",uses:"配線の結束・整理、仮固定",
+   spec:[["長さ","100〜400mm"],["幅","2.5〜8.9mm"],["材質","ナイロン66（耐候・耐熱グレード有）"]],
+   tags:["配線を束ねる","まとめる","結束","仮どめ","ケーブル整理"]},
+  {id:64,name:"配線ステップル／サドル",yomi:"はいせんすてっぷる",cat:"pipe",pic:"staple",aliases:["ステップル","配線サドル","cable staple"],
+   desc:"VVFケーブルなどを柱・壁に打ち留めるコの字形の留め具。",uses:"屋内配線の固定",
+   spec:[["対象","VVF 1.6-2C / 2.0-2C 等"],["材質","鉄 / 樹脂(絶縁)"]],
+   tags:["配線を留める","ケーブルを壁に","打ち込んで固定","コの字"]},
+  {id:65,name:"アイボルト",yomi:"あいぼると",cat:"pipe",pic:"eyebolt",aliases:["吊りボルト","eye bolt","リングボルト"],
+   desc:"頭が輪(リング)になったボルト。フックやワイヤーを掛けて吊る。",uses:"重量物の吊り上げ・玉掛け、ロープ係留",
+   spec:[["ねじ径","M6〜M24"],["使用荷重(目安)","M8≈0.15t / M10≈0.24t（縦吊り）"],["注意","斜め吊りは大幅に荷重低減"]],
+   tags:["吊り上げる","輪に掛ける","ワイヤーを掛ける","玉掛け","リングボルト"]},
+  {id:66,name:"ターンバックル",yomi:"たーんばっくる",cat:"pipe",pic:"turnbuckle",aliases:["turnbuckle","張力調整","胴締め"],
+   desc:"中央の枠を回して両端の長さを縮め、ワイヤー等の張力を調整する。",uses:"ワイヤー・筋交いの張り調整、緩み取り",
+   spec:[["呼び","枠径 W1/4〜W3/4"],["端部","オーフ/フック/アイ"]],
+   tags:["張力を調整","ワイヤーを張る","緩みを取る","長さを縮める","ピンと張る"]},
+  {id:67,name:"シャックル",yomi:"しゃっくる",cat:"pipe",pic:"shackle",aliases:["shackle","連結金具","U字シャックル"],
+   desc:"U字形の本体にピンを通し、ロープ・チェーン・金具を連結する。",uses:"吊り具・係留の連結、取り外し可能な接続",
+   spec:[["呼び","SC形/SB形（φ）"],["使用荷重","サイズ表で確認"]],
+   tags:["連結する","ロープをつなぐ","着脱できる接続","吊り具をつなぐ"]},
+  {id:68,name:"カラビナ／スナップフック",yomi:"からびな",cat:"pipe",pic:"carabiner",aliases:["スナップフック","carabiner","ナスカン"],
+   desc:"ばね式ゲートでワンタッチに掛け外しできる連結フック。",uses:"ワンタッチ連結、吊り下げ、仮固定",
+   spec:[["径","φ4〜φ12"],["注意","墜落防止用途は安全環付の専用品を使用"]],
+   tags:["ワンタッチで掛ける","素早く連結","ばねで閉じる","引っ掛けて外せる"]},
+  {id:69,name:"ワイヤークリップ",yomi:"わいやーくりっぷ",cat:"pipe",pic:"wireclip",aliases:["wire clip","Uクリップ","ワイヤー止め"],
+   desc:"ワイヤーロープを折り返して締め、輪(アイ)を作る留め金具。",uses:"ワイヤーの端末処理・輪の固定",
+   spec:[["適合","ワイヤー径 φ2〜φ12"],["個数","端末あたり 2〜3個"]],
+   tags:["ワイヤーを留める","輪を作る","ロープ端末","折り返して締める"]},
+  {id:70,name:"圧着端子",yomi:"あっちゃくたんし",cat:"pipe",pic:"crimp",aliases:["丸型端子","Y端子","crimp terminal","裸圧着端子"],
+   desc:"電線の先に圧着工具でかしめ、ねじ留め接続できるようにする端子。",uses:"電線とねじ端子台の接続",
+   spec:[["対応電線","0.3〜14sq 等"],["形状","丸(R)/Y(二又)/棒"],["工具","圧着ペンチ必須"]],
+   tags:["電線をつなぐ","端子に留める","かしめる","配線の接続","ねじ止め端子"]},
+
+  {id:90,name:"アジャスター（調整脚）",yomi:"あじゃすたー",cat:"gen",pic:"adjuster",aliases:["レベルフット","adjuster foot","高さ調整脚","アジャスターボルト"],
+   desc:"ねじで高さを微調整できる脚。ガタつき・水平を取る。",uses:"家具・機器の水平出し、ガタつき調整",
+   spec:[["ねじ","M8〜M16"],["調整量","10〜50mm"],["耐荷重","製品による"]],
+   tags:["高さを調整","水平を取る","ガタつき防止","脚の傾き調整","レベル出し"]},
+  {id:91,name:"ゴム足（脚キャップ）",yomi:"ごむあし",cat:"gen",pic:"rubberfoot",aliases:["脚キャップ","rubber foot","滑り止めゴム","椅子脚キャップ"],
+   desc:"家具脚先に付け、滑り止め・床傷防止・防振にする部品。",uses:"床のキズ防止、滑り止め、防振",
+   spec:[["径","φ10〜φ40"],["取付","貼付/ねじ/打込み"]],
+   tags:["滑り止め","床を傷つけない","脚の先に付ける","防振","静かにする"]},
+  {id:92,name:"スペーサー（カラー）",yomi:"すぺーさー",cat:"gen",pic:"spacer",aliases:["カラー","spacer","ジュラコンスペーサー","隙間調整"],
+   desc:"部品間に挟んで距離・隙間を確保する筒状/板状の部品。",uses:"基板の浮かせ、部材間の隙間確保",
+   spec:[["長さ","3〜50mm"],["内径","M3〜M6 用"],["材質","真鍮/樹脂/アルミ"]],
+   tags:["隙間を作る","距離を保つ","浮かせる","間に挟む","高さ稼ぎ"]},
+  {id:93,name:"ナットインサート（圧入ナット）",yomi:"なっといんさーと",cat:"gen",pic:"pressnut",aliases:["圧入ナット","クリンチングナット","PEMナット","エビナット","ブラインドナット"],
+   desc:"薄板に圧入/かしめて、めねじを後付けする部品。薄板にボルト受けを作る。",uses:"薄い金属板にねじ穴(めねじ)を設ける",
+   spec:[["ねじ径","M3〜M8"],["対応板厚","0.8〜2.3mm 等"],["種類","クリンチ/エビナット(ブラインド)"]],
+   tags:["薄板にめねじ","板にねじ穴を作る","ボルト受けを後付け","かしめナット"]},
+
+  /* ===== 締結（ナット・ボルト・座金 追加） ===== */
+  {id:100,name:"袋ナット（キャップナット）",yomi:"ふくろなっと",cat:"fas",pic:"capnut",aliases:["キャップナット","cap nut","ドームナット","化粧ナット"],
+   desc:"片側が閉じたドーム状のナット。ねじ先端を隠し、見た目と安全性を高める。",uses:"ボルト先端の保護・化粧、手すり等",
+   spec:[["ねじ径","M3〜M16"],["材質","鉄(メッキ)・SUS・真鍮"]],
+   tags:["ねじ先を隠す","化粧","先端を保護","手すり","怪我防止"]},
+  {id:101,name:"四角ナット",yomi:"しかくなっと",cat:"fas",pic:"sqnut",aliases:["角ナット","square nut","Tスロットナット"],
+   desc:"四角形のナット。溝(Tスロット)や木材の窪みに収めて回り止めにできる。",uses:"アルミフレームの溝、回り止めが必要な箇所",
+   spec:[["ねじ径","M3〜M12"],["用途","Tスロット/埋め込み"]],
+   tags:["回り止め","溝に入れる","アルミフレーム","四角"]},
+  {id:102,name:"高ナット（ジョイントナット）",yomi:"たかなっと",cat:"fas",pic:"longnut",aliases:["長ナット","ジョイントナット","coupling nut","連結ナット","寸切り継ぎ"],
+   desc:"長い六角ナット。ボルトや寸切りボルト同士を継ぎ足して延長する。",uses:"全ねじの延長・連結、スペーサー代わり",
+   spec:[["ねじ径","M3〜M16"],["長さ","10〜50mm"]],
+   tags:["ボルトを継ぐ","延長する","寸切りをつなぐ","長いナット"]},
+  {id:103,name:"アイナット",yomi:"あいなっと",cat:"fas",pic:"eyenut",aliases:["リングナット","eye nut","環ナット"],
+   desc:"頭が輪になったナット。ボルト側に取り付けて吊り点を作る。",uses:"吊り上げの吊り点(めねじ側)、ロープ係留",
+   spec:[["ねじ径","M6〜M20"],["注意","使用荷重を守る・斜め吊り注意"]],
+   tags:["吊る","輪を作る","めねじ側の吊り点","ワイヤーを掛ける"]},
+  {id:104,name:"止めねじ（イモネジ／ホーローセット）",yomi:"とめねじ",cat:"fas",pic:"setscrew",aliases:["イモネジ","ホーローセット","set screw","grub screw","六角穴付き止めねじ"],
+   desc:"頭の無い小さなねじ。軸やプーリーを押さえて空回り・抜けを止める。",uses:"軸へのプーリー/カラーの固定、つまみの止め",
+   spec:[["ねじ径","M3〜M8"],["先端","平先/くぼみ先/とがり先"],["工具","六角レンチ"]],
+   tags:["軸を固定","空回り止め","頭がない","プーリーを留める","つまみを固定"]},
+  {id:105,name:"Uボルト",yomi:"ゆーぼると",cat:"fas",pic:"ubolt",aliases:["U字ボルト","u bolt","コの字ボルト"],
+   desc:"U字形の両端にねじを切ったボルト。丸棒やパイプを抱き込んで固定する。",uses:"パイプ・丸材の固定、配管の支持",
+   spec:[["呼び","適合管径で選定"],["ねじ","両端 M6〜M12"]],
+   tags:["パイプを抱える","丸棒を固定","配管支持","U字"]},
+  {id:106,name:"フックボルト（Jボルト）",yomi:"ふっくぼると",cat:"fas",pic:"jbolt",aliases:["Jボルト","hook bolt","かぎボルト","波板ビス"],
+   desc:"先がフック状に曲がったボルト。波板や母屋に引っ掛けて固定する。",uses:"波板・折板屋根の留め付け",
+   spec:[["呼び","M6・M8"],["長さ","各種"]],
+   tags:["波板を留める","引っ掛けて固定","屋根","フック状"]},
+  {id:107,name:"ドリルねじ（テックス）",yomi:"どりるねじ",cat:"fas",pic:"tapscrew",aliases:["テックス","ドリルビス","self drilling","ピアスビス","鉄板ビス"],
+   desc:"先端がドリル状で、下穴なしに鉄板へ直接ねじ込めるねじ。",uses:"鉄板・軽天・折板への直接固定",
+   spec:[["呼び","φ4〜φ6"],["適用板厚","製品の能力範囲内"]],
+   tags:["下穴なし","鉄板に直接","軽天","ドリル付き","ねじ込むだけ"]},
+  {id:108,name:"歯付き座金",yomi:"はつきざがね",cat:"fas",pic:"toothwasher",aliases:["内歯ワッシャー","外歯ワッシャー","tooth washer","菊ワッシャー"],
+   desc:"周囲に歯がある座金。歯が食い込み緩み止めと通電(アース)に役立つ。",uses:"緩み止め、電気的なアース接続",
+   spec:[["呼び","M3〜M12 用"],["種類","内歯/外歯"]],
+   tags:["緩み止め","食い込む","アース","通電"]},
+  {id:109,name:"角座金（角ワッシャー）",yomi:"かくざがね",cat:"fas",pic:"sqwasher",aliases:["角ワッシャー","square washer","プレートワッシャー"],
+   desc:"四角い大きな座金。木材など柔らかい材の座面を広く受ける。",uses:"木材の締結で面圧を分散、座掘り受け",
+   spec:[["呼び","M8〜M16 用"],["材質","鉄・SUS"]],
+   tags:["木材の座面","面圧分散","広く受ける","四角い座金"]},
+
+  /* ===== 釘・ステープル ===== */
+  {id:120,name:"丸釘",yomi:"まるくぎ",cat:"fas",pic:"nail",aliases:["釘","nail","鉄丸釘","N釘"],
+   desc:"最も一般的な釘。打ち込んで木材を素早く接合する。",uses:"木材の接合、下地・造作",
+   spec:[["長さ","19〜90mm（N50/N65 等）"],["材質","鉄・ステン・めっき"]],
+   tags:["打ち込む","木材を留める","金づち","釘"]},
+  {id:121,name:"スクリュー釘（リング釘）",yomi:"すくりゅーくぎ",cat:"fas",pic:"screwnail",aliases:["リング釘","screw nail","ねじ釘","フロア釘"],
+   desc:"軸にねじ/リングが付き、抜けにくい釘。床や下地の浮き防止に。",uses:"フローリング・下地の固定(抜け防止)",
+   spec:[["長さ","25〜65mm"],["特徴","リング/スクリュー軸で高保持"]],
+   tags:["抜けにくい","床鳴り防止","フロア","保持力が高い"]},
+  {id:122,name:"仕上げ釘・隠し釘",yomi:"しあげくぎ",cat:"fas",pic:"finishnail",aliases:["隠し釘","finish nail","フィニッシュ","無頭釘"],
+   desc:"頭が小さく目立たない釘。仕上げ材やモールを目立たず留める。",uses:"化粧材・モール・額の固定",
+   spec:[["長さ","15〜45mm"],["頭","極小/スリーブで隠す"]],
+   tags:["目立たない","仕上げ材","頭が小さい","化粧"]},
+  {id:123,name:"コンクリート釘",yomi:"こんくりーとくぎ",cat:"fas",pic:"nail",aliases:["コン釘","concrete nail","焼入れ釘"],
+   desc:"硬い焼入れ鋼の釘。コンクリート・モルタルに直接打ち込める。",uses:"胴縁・桟木のコンクリートへの仮固定",
+   spec:[["長さ","19〜75mm"],["注意","保護メガネ着用"]],
+   tags:["コンクリに打つ","硬い釘","モルタル","仮固定"]},
+  {id:124,name:"ステープル（タッカー針）",yomi:"すてーぷる",cat:"fas",pic:"tackerstaple",aliases:["タッカー針","staple","ガンタッカー","コの字針"],
+   desc:"タッカー(ホチキス状工具)で打つコの字の針。薄物を素早く固定。",uses:"防虫網・断熱材・布・薄板の固定",
+   spec:[["肩幅/足長","各種（T3・MAX 等）"],["工具","ハンド/エアタッカー"]],
+   tags:["タッカーで打つ","網を張る","布を留める","コの字"]},
+
+  /* ===== 木造建築金物 ===== */
+  {id:130,name:"羽子板ボルト",yomi:"はごいたぼると",cat:"bld",pic:"habo",aliases:["羽子板","hagoita bolt"],
+   desc:"平らな板にボルトが付いた金物。梁と柱の引き抜きを防ぐ。",uses:"木造の梁・桁の接合補強",
+   spec:[["呼び","M12 が標準"],["対象","木造軸組"]],
+   tags:["梁を留める","引き抜き防止","木造補強","柱と梁"]},
+  {id:131,name:"短冊金物",yomi:"たんざくかなもの",cat:"bld",pic:"tanzaku",aliases:["短冊","strap","ストラップ金物"],
+   desc:"細長い帯板。柱・梁の継ぎ目をまたいで釘・ボルトで引き寄せる。",uses:"継手・仕口の引張補強",
+   spec:[["板厚","2.3〜3.2mm"],["孔","釘/ボルト用"]],
+   tags:["継ぎ目を補強","引っ張りに強い","木造","帯板"]},
+  {id:132,name:"かど金物（コーナー）",yomi:"かどかなもの",cat:"bld",pic:"kado",aliases:["角金物","corner hardware","CP・T金物"],
+   desc:"L字の補強金物。柱と土台・横架材の出隅を緊結する。",uses:"木造の出隅・仕口補強",
+   spec:[["種類","CP-L / CP-T 等"],["留め","専用ビス/釘"]],
+   tags:["角を固定","出隅補強","木造","L字"]},
+  {id:133,name:"山形プレート",yomi:"やまがたぷれーと",cat:"bld",pic:"vplate",aliases:["VP金物","V plate"],
+   desc:"V(山)形の補強プレート。柱と横架材を斜めに緊結する。",uses:"筋かい端部・仕口の補強",
+   spec:[["種類","VP / VP2"],["留め","専用釘 ZN 等"]],
+   tags:["筋かい補強","木造","山形","斜めに留める"]},
+  {id:134,name:"筋交いプレート",yomi:"すじかいぷれーと",cat:"bld",pic:"brace",aliases:["筋違い金物","brace plate","BP金物"],
+   desc:"筋交いの端部を柱・土台に固定する金物。耐力壁に必須。",uses:"筋交いの端部接合(耐震)",
+   spec:[["種類","BP / BP-2"],["留め","専用ビス/ボルト"]],
+   tags:["筋交いを留める","耐震","木造","端部固定"]},
+  {id:135,name:"ホールダウン金物",yomi:"ほーるだうんかなもの",cat:"bld",pic:"holddown",aliases:["引き寄せ金物","hold down","HD金物"],
+   desc:"柱の引き抜きを基礎・土台へ伝えて止める金物。アンカーボルトと併用。",uses:"耐力壁端部・柱脚の引抜き防止(耐震)",
+   spec:[["呼び","10kN〜25kN 等"],["併用","ホールダウン用アンカーボルト"]],
+   tags:["柱の引き抜き防止","耐震","基礎とつなぐ","木造"]},
+  {id:136,name:"火打金物",yomi:"ひうちかなもの",cat:"bld",pic:"hiuchi",aliases:["火打ち","hiuchi","水平補強"],
+   desc:"床・小屋組の隅に斜めに入れ、水平面の変形を防ぐ。",uses:"床組・小屋組の水平補強",
+   spec:[["材","鋼製火打/木製火打"],["留め","ボルト/ビス"]],
+   tags:["隅を補強","水平の変形防止","木造","斜め材"]},
+  {id:137,name:"棚柱（チャンネルサポート）",yomi:"たなばしら",cat:"bld",pic:"shelfpost",aliases:["ガチャ柱","チャンネルサポート","shelf standard","ロイヤル","SPサポート"],
+   desc:"溝が並んだ柱レール。棚受けを差し込み、棚の高さを自由に変えられる。",uses:"可動棚の支柱(壁付け/間仕切り)",
+   spec:[["長さ","600〜2400mm"],["種類","ダボ用 / ブラケット用(1列・2列)"]],
+   tags:["棚の高さを変える","可動棚","棚受けを差す","壁面収納"]},
+  {id:138,name:"ドアストッパー（戸当たり）",yomi:"どあすとっぱー",cat:"bld",pic:"doorstop",aliases:["戸当たり","door stopper","ドア止め","マグネット戸当り"],
+   desc:"扉の開きすぎ・壁当たりを止める部品。床付け/マグネット式など。",uses:"扉の保持・壁の保護",
+   spec:[["型","床付け/マグネット/オートヒンジ用"]],
+   tags:["扉を止める","開いたまま保持","壁を守る","ドアの当たり"]},
+  {id:139,name:"掛金（掛けがね）",yomi:"かけがね",cat:"bld",pic:"hasp",aliases:["掛け金","hasp","ロック掛金","南京錠掛け"],
+   desc:"扉・蓋を引っ掛けて閉じる金具。南京錠と併用して施錠もできる。",uses:"物置・門扉・箱の戸締り",
+   spec:[["長さ","各種"],["材質","鉄(メッキ)・SUS"]],
+   tags:["戸締り","引っ掛けて閉じる","南京錠と併用","防犯"]},
+  {id:140,name:"落とし（丸落とし・フランス落とし）",yomi:"おとし",cat:"bld",pic:"droprod",aliases:["丸落とし","フランス落とし","door bolt","ラッチボルト","親子扉"],
+   desc:"棒を上下に動かして床・枠の穴に落とし込み、扉を固定する。",uses:"両開き扉の片側固定、門扉の戸締り",
+   spec:[["長さ","100〜300mm 等"],["取付","面付け/彫込み"]],
+   tags:["扉を固定","両開きの片側","上げ下げで留める","戸締り"]},
+  {id:141,name:"面付け箱錠・本締錠",yomi:"めんつけばこじょう",cat:"bld",pic:"lock",aliases:["箱錠","本締錠","rim lock","引き違い錠","戸先錠"],
+   desc:"扉に取り付ける錠前。鍵やサムターンでデッドボルトを出し施錠する。",uses:"玄関・勝手口・引き戸の施錠",
+   spec:[["型","面付け/彫込み、片面/両面"],["注意","扉厚・バックセットを確認"]],
+   tags:["鍵をかける","施錠","防犯","錠前"]},
+  {id:143,name:"額縁フック・ピクチャーレール",yomi:"がくぶちふっく",cat:"bld",pic:"hook",aliases:["額吊り","picture hook","ピクチャーレール","X金具"],
+   desc:"絵や額を壁に掛ける専用フック/レール。荷重表示に従って使う。",uses:"額・絵・ミラーの壁掛け",
+   spec:[["耐荷重","製品表示(例 1本5〜10kg)"],["留め","専用ピン/ねじ"]],
+   tags:["額を掛ける","絵を飾る","壁掛け","ピクチャーレール"]},
+
+  /* ===== チェーン・ロープ・ワイヤー金具 ===== */
+  {id:150,name:"チェーン（鎖）",yomi:"ちぇーん",cat:"pipe",pic:"chain",aliases:["鎖","chain","リンクチェーン","ショートリンク"],
+   desc:"金属の輪をつないだ鎖。吊り・連結・仕切り・防犯に使う。",uses:"簡易吊り、車止め・仕切り、係留",
+   spec:[["呼び","φ2〜φ8 等"],["材質","鉄(メッキ)・SUS"],["注意","吊りは荷重規定品を使用"]],
+   tags:["つなぐ","吊る","仕切る","鎖","連結"]},
+  {id:151,name:"ワイヤーロープ",yomi:"わいやーろーぷ",cat:"pipe",pic:"wirerope",aliases:["ワイヤー","wire rope","より線","ステンレスワイヤー"],
+   desc:"細い鋼線をより合わせたロープ。強くしなやか。端末は専用金具で処理。",uses:"吊り・支持・物干し・手すりワイヤー",
+   spec:[["径","φ1.5〜φ12 等"],["端末","クリップ/スリーブ/ターンバックル"]],
+   tags:["吊る","張る","ワイヤー","物干し","しなやかで強い"]},
+  {id:152,name:"重量フック（吊りフック）",yomi:"じゅうりょうふっく",cat:"pipe",pic:"heavyhook",aliases:["吊りフック","crane hook","フックC","スイベルフック"],
+   desc:"荷重に耐える吊り用フック。外れ止め(ラッチ)付きが安全。",uses:"チェーン・ワイヤー先端の吊り金具",
+   spec:[["使用荷重","製品の刻印を確認"],["安全","外れ止め付き推奨"]],
+   tags:["吊り上げる","フック","外れ止め","荷を掛ける"]},
+  {id:153,name:"スイベル（より戻し）",yomi:"すいべる",cat:"pipe",pic:"swivel",aliases:["より戻し","swivel","サルカン","回転環"],
+   desc:"二つの環が自由に回転する金具。ロープ・チェーンのねじれを逃がす。",uses:"吊り・係留のねじれ防止",
+   spec:[["呼び","各種φ"],["材質","鉄(メッキ)・SUS"]],
+   tags:["ねじれを取る","回転する","絡み防止","連結"]},
+  {id:154,name:"丸環・リング（吊り環）",yomi:"まるかん",cat:"pipe",pic:"ring",aliases:["丸カン","welded ring","溶接リング","角環","集約リング"],
+   desc:"溶接された金属の輪。複数のロープ・フックを集約する連結点に。",uses:"吊り点の集約、ロープの結束点",
+   spec:[["径","各種φ"],["形","丸環/角環"]],
+   tags:["集約する","連結点","輪","ロープをまとめる"]},
+  {id:155,name:"ナスカン（スナップ）",yomi:"なすかん",cat:"pipe",pic:"nasukan",aliases:["茄子環","snap hook","スナップフック","キーナスカン","回転ナスカン"],
+   desc:"ばね指で開閉する茄子形フック。ワンタッチで掛け外しできる。",uses:"鎖・ロープ・ストラップのワンタッチ連結",
+   spec:[["呼び","各種"],["型","固定/回転(スイベル付)"]],
+   tags:["ワンタッチ","掛け外し","ばね","茄子形","ストラップ"]},
+
+  /* ===== 配管・電設 追加 ===== */
+  {id:160,name:"リングスリーブ（圧着スリーブ）",yomi:"りんぐすりーぶ",cat:"pipe",pic:"sleeve",aliases:["圧着スリーブ","リングスリーブ","E形スリーブ","電線接続スリーブ"],
+   desc:"複数の電線をまとめて圧着し電気的に接続する筒。専用工具でかしめる。",uses:"屋内配線の電線同士の接続(結線)",
+   spec:[["サイズ","小/中/大"],["工具","リングスリーブ用圧着工具(刻印)"]],
+   tags:["電線をつなぐ","結線","圧着","まとめて接続"]},
+  {id:161,name:"差込形コネクタ",yomi:"さしこみこねくた",cat:"pipe",pic:"connector",aliases:["差込コネクタ","ワンタッチコネクタ","push-in connector","WAGO","ワゴ"],
+   desc:"電線を差し込むだけで接続できるコネクタ。工具不要で結線できる。",uses:"屋内配線の電線接続(工具レス)",
+   spec:[["極数","2〜8 本用"],["対応","単線(より線対応品も有)"]],
+   tags:["差し込むだけ","電線接続","工具不要","結線"]},
+  {id:162,name:"吊りバンド（パイプ吊り）",yomi:"つりばんど",cat:"pipe",pic:"hangband",aliases:["吊りバンド","pipe hanger","全ねじ吊り","タンバックル吊り"],
+   desc:"配管を抱いて全ねじ(吊りボルト)から吊る支持金具。",uses:"天井からの配管吊り支持",
+   spec:[["呼び","管径で選定(15A〜)"],["吊り","W3/8・M10 全ねじ用"]],
+   tags:["配管を吊る","天井から支持","全ねじで吊る","パイプ支持"]},
+
+  /* ===== ゴム・樹脂・ばね ===== */
+  {id:170,name:"グロメット（配線ブッシュ）",yomi:"ぐろめっと",cat:"gen",pic:"grommet",aliases:["ハトメゴム","grommet","配線ブッシュ","ケーブルブッシュ"],
+   desc:"板の穴に嵌め、貫通する配線を切れ・擦れから守るゴム輪。",uses:"鈑金の穴を通す配線の保護",
+   spec:[["適合穴径","各種φ"],["材質","ゴム/エラストマー"]],
+   tags:["配線を守る","穴の縁を保護","擦れ防止","ゴム輪"]},
+  {id:171,name:"ゴムブッシュ・防振ゴム",yomi:"ごむぶっしゅ",cat:"gen",pic:"bush",aliases:["防振ゴム","rubber bush","マウントゴム","インシュレーター"],
+   desc:"振動・衝撃を吸収するゴム部品。機器の脚や取付部に挟む。",uses:"機器の防振・防音、ガタ吸収",
+   spec:[["型","おねじ/めねじ/両ねじ・ブッシュ"],["材質","防振ゴム"]],
+   tags:["防振","振動を抑える","衝撃吸収","静音"]},
+  {id:172,name:"Oリング",yomi:"おーりんぐ",cat:"gen",pic:"oring",aliases:["O-ring","パッキン","シールリング"],
+   desc:"断面が円形のゴム輪。溝に入れ隙間を塞ぎ、水・空気・油の漏れを防ぐ。",uses:"配管・機器の静的/動的シール",
+   spec:[["規格","JIS B2401(P/G/S)"],["材質","NBR/フッ素/シリコン"]],
+   tags:["漏れを止める","パッキン","シール","隙間を塞ぐ"]},
+  {id:173,name:"クッションゴム・戸当たりゴム",yomi:"くっしょんごむ",cat:"gen",pic:"rubberfoot",aliases:["戸当たりゴム","bumper","半球ゴム","防音ゴム","クッション"],
+   desc:"貼り付けて衝突音・傷を防ぐ小さなゴム。扉・蓋・家具に。",uses:"当たり音/傷の防止、滑り止め",
+   spec:[["形","半球/円柱/角"],["取付","粘着/打込み"]],
+   tags:["音を消す","当たりを和らげる","傷防止","貼るゴム"]},
+  {id:174,name:"面ファスナー（マジックテープ）",yomi:"めんふぁすなー",cat:"gen",pic:"velcro",aliases:["マジックテープ","velcro","ベルクロ","フック&ループ"],
+   desc:"フック面とループ面で着脱できる固定テープ。繰り返し貼り直せる。",uses:"軽い物の仮固定・束ね・着脱",
+   spec:[["幅","20〜100mm"],["型","縫付/粘着付"]],
+   tags:["貼って剥がせる","繰り返し着脱","仮固定","束ねる"]},
+  {id:175,name:"引張ばね",yomi:"ひっぱりばね",cat:"gen",pic:"tensionspring",aliases:["引きばね","tension spring","extension spring","スプリング"],
+   desc:"引っ張る力に抵抗して縮もうとするばね。両端のフックで掛ける。",uses:"戻り機構、テンション付与、扉の自閉補助",
+   spec:[["線径/外径/自由長","各種"],["材質","ピアノ線/SUS"]],
+   tags:["引っ張る","元に戻す力","テンション","ばね"]},
+  {id:176,name:"圧縮ばね",yomi:"あっしゅくばね",cat:"gen",pic:"compspring",aliases:["押しばね","compression spring","コイルスプリング"],
+   desc:"押し縮める力に反発するばね。隙間に入れて押し戻す力を得る。",uses:"押し戻し機構、ガタ詰め、ボタンの戻し",
+   spec:[["線径/外径/自由長","各種"],["材質","ピアノ線/SUS"]],
+   tags:["押し返す","反発する","隙間を詰める","ばね"]},
+];
+const byId=id=>DB.find(p=>p.id===id);
+
+/* =========================================================
+   2) 用途診断ツリー（多段対応）
+      node = { q, hint?, opts:[ {ol, od, recs?|next?} ] }
+      recs = [ {id, why} ]   /   next = 次の node（第2問）
+   ========================================================= */
+const INTENTS=[
+ {key:"mount",ic:"📌",label:"壁・床・天井に留める",sub:"何かを取り付けたい",
+  root:{q:"取り付ける面はどれですか？",
+   opts:[
+    {ol:"コンクリート・モルタル",od:"叩くと硬い・ドリルが要る面",
+     next:{q:"取り付ける物の重さ・用途は？",hint:"重さで打ち込みアンカーか樹脂プラグかが変わります",
+      opts:[
+       {ol:"重量物（機械・室外機・棚柱）",od:"はっきり重い／安全に関わる",recs:[
+         {id:12,why:"コンクリートに穴をあけ打ち込む、最も保持力の高いアンカー。重量物はこれ。"},
+         {id:1,why:"アンカー側がめねじ式の場合、固定はこのボルトで行う。"}]},
+       {ol:"軽〜中量（額・時計・小棚）",od:"数kg程度",recs:[
+         {id:13,why:"穴に挿してねじを締めるだけ。軽〜中量なら手軽で十分。"}]},
+      ]}},
+    {ol:"石膏ボードの壁",od:"叩くとコンコン響く・中が空洞",
+     next:{q:"掛ける物の重さは？",hint:"ボードは弱いので、重い物は『下地(間柱)』利用が原則",
+      opts:[
+       {ol:"〜5kg（額・時計・小物）",od:"軽い物",recs:[
+         {id:14,why:"ねじ込み式のボードアンカーで十分。下地が無い場所でも留められる。"}]},
+       {ol:"5〜15kg（ミラー・小棚）",od:"中くらい",recs:[
+         {id:14,why:"金属拡張式/トグル式のボードアンカーを複数点で。許容荷重を確認。"}]},
+       {ol:"15kg以上（TV・大型棚）",od:"重い・落ちると危険",recs:[
+         {id:11,why:"原則：下地(間柱)を探し、そこへ木ねじで固定するのが安全。"},
+         {id:14,why:"下地が無い位置は、重量用の金属アンカーを複数併用で補う。"}]},
+      ]}},
+    {ol:"木材・木の下地がある",od:"間柱・合板・角材",recs:[
+      {id:11,why:"木に直接ねじ込むだけ。保持力が高くDIYの定番。"},
+      {id:43,why:"引っ掛けて使うならねじ込みフックが手軽。"}]},
+    {ol:"薄い金属板",od:"鉄板・アルミ板・ダクト",recs:[
+      {id:10,why:"下穴だけ（または無し）で自分でねじ山を切って留まる。"},
+      {id:93,why:"後でボルト着脱したいなら、板にめねじを作るこれ。"},
+      {id:19,why:"裏に手が届かず外す予定が無いならかしめ固定。"}]},
+    {ol:"タイル・面を傷つけたくない",od:"浴室・外装タイル",recs:[
+      {id:13,why:"下地材まで効かせる樹脂アンカー。低速でゆっくり穴あけしタイル割れを防ぐ。"}]},
+   ]}},
+
+ {key:"join",ic:"🔗",label:"物と物をつなぐ",sub:"接合・固定したい",
+  root:{q:"何と何をつなぎますか？",
+   opts:[
+    {ol:"木材どうし（面で接合）",od:"板を組む・箱を作る",recs:[
+      {id:11,why:"最も手早い。斜め打ちや下地への固定にも。"},
+      {id:34,why:"表に金具を見せず、位置決めしながら接ぐならダボ。"}]},
+    {ol:"木材を繰り返し分解したい／脚を付ける",od:"組立家具・ノックダウン",recs:[
+      {id:18,why:"木に金属めねじを埋め込み、ボルトで何度も着脱できる。"}]},
+    {ol:"木枠・棚を直角に補強",od:"ぐらつきを止めたい",recs:[
+      {id:32,why:"角に当てて2方向を固定。ぐらつき・歪みを抑える。"}]},
+    {ol:"金属・機械部品をしっかり",od:"鋼材・フレーム",
+     next:{q:"部材の厚み・強度の目安は？",
+      opts:[
+       {ol:"薄め〜中・一般用途",od:"小物・軽いフレーム",recs:[
+         {id:1,why:"M5〜M6 程度。貫通させてナットで締める基本の締結。"},
+         {id:3,why:"相手のナット。平/ばね座金と併用すると確実。"}]},
+       {ol:"厚い・強度や安全が重要",od:"荷重がかかる・振動する",recs:[
+         {id:1,why:"M8〜M10、強度区分8.8以上を選ぶと安心。"},
+         {id:4,why:"振動で緩む箇所はロックナットで緩み止め。"},
+         {id:2,why:"頭を埋めたい・狭い所なら六角穴付きで。"}]},
+      ]}},
+    {ol:"薄板どうしを永久固定（裏に手が届かない）",od:"板金・ダクト・看板",recs:[
+      {id:19,why:"片側からの作業でかしめ固定。外す予定が無い箇所に。"}]},
+   ]}},
+
+ {key:"hang",ic:"🪝",label:"吊る・引っ掛ける",sub:"上から下げたい",
+  root:{q:"どのように吊りますか？",
+   opts:[
+    {ol:"重い物をワイヤー／フックで吊り上げ",od:"機械・荷の玉掛け",
+     next:{q:"おおよその荷重は？",hint:"必ず製品の『使用荷重(WLL)』内で使用してください",
+      opts:[
+       {ol:"〜0.1t（約100kg）程度",od:"小〜中の荷",recs:[
+         {id:65,why:"M8〜M10 のアイボルトをねじ込み、フック/ワイヤーを掛けて吊る。"},
+         {id:67,why:"ワイヤーやチェーンを着脱式に連結するなら併用。"}]},
+       {ol:"0.1t以上の重荷重",od:"重い・安全が最優先",recs:[
+         {id:65,why:"大径アイボルトを使用荷重表で選定。斜め吊りは荷重が大きく下がる点に注意。"},
+         {id:67,why:"定格付きシャックルで連結。刻印の使用荷重を必ず確認。"}]},
+      ]}},
+    {ol:"ワイヤー・ロープ・チェーンを連結",od:"つなぎ目を作る",recs:[
+      {id:67,why:"ピンを抜けば外せるU字連結金具。"},
+      {id:69,why:"ワイヤー端を折り返して輪(アイ)を作るならこれ。"}]},
+    {ol:"ワンタッチで掛け外ししたい",od:"頻繁に付け外す",recs:[
+      {id:68,why:"ばね式ゲートで素早く掛け外しできる。"}]},
+    {ol:"天井から棒で吊り下げ（長さ調整）",od:"配管・看板・棚の吊り",recs:[
+      {id:17,why:"全ねじ棒を好きな長さに切り、ナットで高さ調整して吊る。"}]},
+    {ol:"壁に軽い物を掛ける",od:"工具・小物",recs:[
+      {id:43,why:"ねじ込み・接着式のフックで手軽に引っ掛け収納。"}]},
+   ]}},
+
+ {key:"door",ic:"🚪",label:"扉・フタを開け閉めする",sub:"建具・家具の開閉",
+  root:{q:"どんな開閉にしたいですか？",
+   opts:[
+    {ol:"普通に回転して開く扉・フタ",od:"ドア・箱のふた",recs:[
+      {id:30,why:"開閉軸の基本金物。見える位置に付く一般的なヒンジ。"}]},
+    {ol:"収納扉（金具を見せず・調整したい）",od:"キッチン・キャビネット",recs:[
+      {id:31,why:"閉じると外から見えず、上下左右の微調整ができる。"}]},
+    {ol:"横にスライドする引き戸",od:"押し入れ・サッシ",recs:[
+      {id:36,why:"戸の下に付けてレール上を滑らかに走らせる。"}]},
+    {ol:"上開き／途中で止めたい・ゆっくり閉じたい",od:"跳ね上げ扉・収納ベンチ",recs:[
+      {id:41,why:"任意角度で保持、またはダンパーでゆっくり閉じる。"}]},
+    {ol:"扉が勝手に開かないようにしたい",od:"観音開きの押さえ",recs:[
+      {id:40,why:"磁石で閉位置にパチンと保持する。"}]},
+    {ol:"開けるための持ち手が欲しい",od:"つかむ所・引く所",recs:[
+      {id:38,why:"握って引くタイプの取手。"},
+      {id:39,why:"指でつまむ小型はこちら。"}]},
+   ]}},
+
+ {key:"move",ic:"🛞",label:"動かす・スライドさせる",sub:"移動・出し入れ",
+  root:{q:"何を動かしますか？",
+   opts:[
+    {ol:"家具・台車ごと移動したい",od:"ワゴン・棚",recs:[
+      {id:35,why:"脚に付ければ転がせる。止めたい時はストッパー付きを。"}]},
+    {ol:"引き出しを前後に出し入れ",od:"デスク・収納",recs:[
+      {id:37,why:"左右に付けて滑らかに引き出す。ベアリング式はフルに出せる。"}]},
+    {ol:"引き戸を滑らせたい",od:"建具",recs:[
+      {id:36,why:"戸の下でレールを走る小車輪。"}]},
+   ]}},
+
+ {key:"loosen",ic:"🛡️",label:"緩み・抜けを防ぐ",sub:"締めた後の対策",
+  root:{q:"何を防ぎたいですか？",
+   opts:[
+    {ol:"ナットが振動で緩む",od:"機械・車両など",recs:[
+      {id:4,why:"内部の樹脂や構造で緩みを止める。確実なのはこれ。"},
+      {id:6,why:"ばねの力で緩みを抑える補助。ナットの下に入れる。"}]},
+    {ol:"締め付け面を守りたい・座面を広げたい",od:"木やアルミにめり込む",recs:[
+      {id:5,why:"下に敷いて面圧を分散。めり込みや傷を防ぐ。"}]},
+    {ol:"ナット・ピンの脱落を止めたい",od:"溝付きナット等",recs:[
+      {id:21,why:"穴に通して足を開き、確実に抜け止め。"}]},
+    {ol:"軸の上の部品が抜ける／ずれる",od:"歯車・ベアリング",recs:[
+      {id:20,why:"軸の溝にはめて部品の移動・抜けを止める。"}]},
+   ]}},
+
+ {key:"wire",ic:"🔌",label:"配線・ホース・パイプを留める",sub:"束ねる・固定・接続",
+  root:{q:"対象と目的は？",
+   opts:[
+    {ol:"配線をまとめて束ねたい",od:"ケーブル整理",recs:[
+      {id:63,why:"巻いて締めるだけ。束ね・仮固定の定番。"}]},
+    {ol:"配線を壁・柱に打ち留めたい",od:"屋内のVVF配線",recs:[
+      {id:64,why:"コの字を打ち込んでケーブルを固定。"},
+      {id:60,why:"電線管・太い線ならサドルで固定。"}]},
+    {ol:"パイプ・電線管を壁/天井に固定",od:"配管の取り回し",recs:[
+      {id:60,why:"半円バンドで壁に沿わせて留める。"},
+      {id:61,why:"一周締めて吊り・支持するならこちら。"}]},
+    {ol:"ゴムホースを継手に締めて漏れを止める",od:"水・エア・燃料ホース",recs:[
+      {id:62,why:"ねじで径を締め、抜け・漏れを防ぐ。"}]},
+    {ol:"電線をねじ端子につなぎたい",od:"端子台・機器",recs:[
+      {id:70,why:"電線先にかしめて、ねじ留めできる形にする。"}]},
+   ]}},
+
+ {key:"adjust",ic:"📐",label:"高さ・隙間・ガタを調整",sub:"水平・スペース確保",
+  root:{q:"何を調整しますか？",
+   opts:[
+    {ol:"脚の高さ・水平・ガタつき",od:"家具・機械がガタガタ",recs:[
+      {id:90,why:"ねじで高さを微調整し、傾き・ガタを取る。"},
+      {id:91,why:"高さ調整は不要で、滑り止め・床傷防止だけならゴム足。"}]},
+    {ol:"部品の間に隙間・距離を作りたい",od:"基板を浮かせる等",recs:[
+      {id:92,why:"間に挟んで一定の距離・隙間を確保する筒。"}]},
+    {ol:"床のキズ・滑り・音を抑えたい",od:"椅子・テーブルの脚先",recs:[
+      {id:91,why:"脚先に付けて滑り止め・床傷防止・防振。"}]},
+   ]}},
+
+ {key:"hand",ic:"✋",label:"工具なしで手締めしたい",sub:"よく着脱する箇所",
+  root:{q:"締めるのは？",
+   opts:[
+    {ol:"ボルト側を手で回したい",od:"カバー・治具の固定",recs:[
+      {id:15,why:"羽根状の頭を指で回せる。工具不要で頻繁な着脱に。"}]},
+    {ol:"ナット側を手で回したい",od:"相手がボルトのとき",recs:[
+      {id:16,why:"羽根付きで手締めできるナット。"}]},
+   ]}},
+
+ {key:"head",ic:"🔩",label:"ねじの頭の納まりで選ぶ",sub:"見た目・引っ掛かり",
+  root:{q:"頭をどうしたいですか？",
+   opts:[
+    {ol:"表面と平らに沈めたい（出っ張らせない）",od:"引っ掛かりを無くす",recs:[
+      {id:8,why:"円錐頭が座ぐりに沈み、面一に仕上がる。"}]},
+    {ol:"普通でよい（頭が出てOK）",od:"一般的な部品留め",recs:[
+      {id:7,why:"最も汎用的な小ねじ。プラスドライバーで締める。"}]},
+    {ol:"薄い物を広く押さえたい",od:"薄板・布・ステー",recs:[
+      {id:9,why:"頭が大きく低いので、広い面で押さえられる。"}]},
+   ]}},
+
+ {key:"nail",ic:"🪵",label:"釘・タッカーで留める",sub:"打ち込んで固定",
+  root:{q:"何を打ち留めますか？",
+   opts:[
+    {ol:"木材を手早く接合",od:"下地・造作",recs:[
+      {id:120,why:"打つだけで素早く接合できる定番の釘。"},
+      {id:121,why:"床鳴り・浮きを防ぎたいなら抜けにくいリング釘。"}]},
+    {ol:"仕上げ材を目立たず留める",od:"モール・化粧材・額",recs:[
+      {id:122,why:"頭が小さく目立たない仕上げ釘。"}]},
+    {ol:"コンクリート・モルタルに桟木",od:"硬い面へ",recs:[
+      {id:123,why:"焼入れ鋼で硬い面に直接打ち込める。保護メガネ必須。"}]},
+    {ol:"網・布・断熱材を張る",od:"薄物の固定",recs:[
+      {id:124,why:"タッカーでコの字の針を打ち、薄物を素早く固定。"}]},
+   ]}},
+
+ {key:"reinforce",ic:"🏠",label:"木造を補強する（建築金物）",sub:"耐震・仕口の緊結",
+  root:{q:"どこを補強しますか？",
+   opts:[
+    {ol:"梁・桁の引き抜きを止める",od:"横架材の接合",recs:[
+      {id:130,why:"梁と柱の引き抜きを防ぐ定番。M12が標準。"},
+      {id:131,why:"継ぎ目をまたいで引き寄せるなら短冊金物。"}]},
+    {ol:"柱と土台の出隅・仕口",od:"角の緊結",recs:[
+      {id:132,why:"L字で出隅を緊結するかど金物。"},
+      {id:133,why:"斜めに緊結する山形プレートも併用。"}]},
+    {ol:"筋交い（耐力壁）の端部",od:"耐震",recs:[
+      {id:134,why:"筋交いの端部を柱・土台へ固定する金物。"},
+      {id:133,why:"山形プレートで端部を補強。"}]},
+    {ol:"柱脚の引き抜き（耐震金物）",od:"基礎へ伝える",recs:[
+      {id:135,why:"柱の引き抜きを基礎へ伝えるホールダウン。専用アンカーと併用。"}]},
+    {ol:"床・小屋組の水平変形",od:"隅の振れ止め",recs:[
+      {id:136,why:"隅に斜めに入れて水平面の変形を防ぐ火打金物。"}]},
+   ]}},
+
+ {key:"secure",ic:"🔒",label:"戸締り・防犯・施錠",sub:"開かないようにする",
+  root:{q:"どうしたいですか？",
+   opts:[
+    {ol:"南京錠でロックしたい",od:"物置・門扉・倉庫",recs:[
+      {id:139,why:"引っ掛けて閉じ、南京錠を通して施錠できる掛金。"}]},
+    {ol:"鍵で施錠したい（扉）",od:"玄関・勝手口・引き戸",recs:[
+      {id:141,why:"鍵・サムターンでデッドボルトを出す錠前。扉厚を要確認。"}]},
+    {ol:"両開き扉の片側を固定",od:"親子扉・門扉",recs:[
+      {id:140,why:"棒を床/枠の穴に落として片側を固定する落とし。"}]},
+    {ol:"扉を開けたまま/壁当たり防止",od:"ドアの保持",recs:[
+      {id:138,why:"開きすぎ・壁当たりを止めるドアストッパー。"}]},
+   ]}},
+
+ {key:"shelf",ic:"🗄️",label:"棚・収納を作る",sub:"棚板・引き出し",
+  root:{q:"どんな棚にしますか？",
+   opts:[
+    {ol:"高さを自由に変えられる棚",od:"壁面・間仕切り収納",recs:[
+      {id:137,why:"溝レールに棚受けを差し、高さを自在に変えられる棚柱。"},
+      {id:33,why:"棚柱に差し込む棚受け(ブラケット)。"}]},
+    {ol:"棚板を載せる受けが欲しい",od:"固定棚・可動棚",recs:[
+      {id:33,why:"壁に棚板を水平支持するブラケット。"},
+      {id:34,why:"棚板の四隅を受けるダボ(可動棚)。"}]},
+    {ol:"引き出しを付けたい",od:"出し入れ",recs:[
+      {id:37,why:"滑らかに前後させるスライドレール。"}]},
+   ]}},
+
+ {key:"chain",ic:"⛓️",label:"チェーン・ロープでつなぐ／吊る",sub:"連結・係留・張り",
+  root:{q:"何をしたいですか？",
+   opts:[
+    {ol:"ワンタッチで連結・着脱",od:"鎖・ストラップ",recs:[
+      {id:155,why:"ばね指で素早く掛け外しできるナスカン。"},
+      {id:68,why:"より頑丈な連結はカラビナ。"}]},
+    {ol:"複数のロープ/フックを集約",od:"連結点を作る",recs:[
+      {id:154,why:"複数を1点に集約する溶接リング(丸環)。"},
+      {id:67,why:"着脱できる連結はシャックル。"}]},
+    {ol:"ねじれ・絡みを防ぐ",od:"回転させたい",recs:[
+      {id:153,why:"二つの環が回ってねじれを逃がすスイベル。"}]},
+    {ol:"重い物を吊り上げる",od:"荷の吊り",recs:[
+      {id:152,why:"外れ止め付きの重量フックで吊る。"},
+      {id:65,why:"吊り点はアイボルト。使用荷重を厳守。"}]},
+    {ol:"ワイヤーをピンと張りたい",od:"物干し・手すり",recs:[
+      {id:151,why:"しなやかで強いワイヤーロープ。"},
+      {id:66,why:"張力はターンバックルで調整。"},
+      {id:69,why:"端末の輪はワイヤークリップで作る。"}]},
+   ]}},
+
+ {key:"connect",ic:"💡",label:"電線をつなぐ（結線）",sub:"電気配線の接続",
+  root:{q:"どの接続ですか？",
+   opts:[
+    {ol:"電線同士をつなぎたい",od:"分岐・延長",recs:[
+      {id:161,why:"差し込むだけで結線できるワンタッチコネクタ(工具不要)。"},
+      {id:160,why:"確実に圧着するならリングスリーブ(専用工具)。"}]},
+    {ol:"電線を機器のねじ端子へ",od:"端子台・盤",recs:[
+      {id:70,why:"電線先に圧着してねじ留めできる圧着端子。"}]},
+   ]}},
+];
+
+/* =========================================================
+   3) 共通カード描画（イラスト＋サイズ表）
+   ========================================================= */
+function specTable(p){
+  if(!p.spec||!p.spec.length)return"";
+  return `<table class="spec">`+p.spec.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join("")+`</table>`;
+}
+function cardHTML(p,why,tokens){
+  const aliases=(p.aliases||[]).slice(0,6).map(a=>`<span class="tag">${a}</span>`).join("");
+  const whyHTML=why?`<p class="why">💡 ${why}</p>`:"";
+  const hi=t=>tokens?highlight(t,tokens):t;
+  return `<div class="card"><div class="cardrow">
+    <div class="illus">${illusHTML(p)}</div>
+    <div class="cbody">
+      <h3><span>${hi(p.name)}</span><span class="yomi">${p.yomi}</span>
+          <span class="catbadge cat-${p.cat}">${CATLABEL[p.cat]}</span></h3>
+      ${whyHTML}
+      <p class="desc">${hi(p.desc)}</p>
+      <p class="uses"><b>用途：</b>${hi(p.uses)}</p>
+      ${specTable(p)}
+      <div class="tags">${aliases}</div>
+    </div>
+  </div></div>`;
+}
+
+/* =========================================================
+   4) 用途診断（多段ナビ：履歴スタック）
+   ========================================================= */
+const elIntentGrid=document.getElementById("intentGrid");
+const elGuideTop=document.getElementById("guideTop");
+const elGuideFlow=document.getElementById("guideFlow");
+const elFlowBody=document.getElementById("flowBody");
+const elCrumb=document.getElementById("crumbPath");
+let stack=[]; // [{title, node?|recs?}]
+
+elIntentGrid.innerHTML=INTENTS.map((it,i)=>
+  `<div class="tile" data-i="${i}">
+     <span class="ic">${it.ic}</span><span class="tl">${it.label}</span><span class="sb">${it.sub}</span>
+   </div>`).join("");
+elIntentGrid.querySelectorAll(".tile").forEach(t=>
+  t.addEventListener("click",()=>{const it=INTENTS[+t.dataset.i];stack=[{title:it.label,node:it.root}];renderFlow();}));
+
+function renderFlow(){
+  elGuideTop.classList.add("hidden");
+  elGuideFlow.classList.remove("hidden");
+  elCrumb.textContent=stack.map(s=>s.title).join("  ▸  ");
+  const cur=stack[stack.length-1];
+
+  if(cur.recs){ // 結果（葉）
+    elFlowBody.innerHTML=`<div class="meta">おすすめの金物：${cur.recs.length} 件</div>`
+      +cur.recs.map(r=>cardHTML(byId(r.id),r.why)).join("");
+  }else{ // 質問
+    const n=cur.node;
+    elFlowBody.innerHTML=`<div class="qtitle">${n.q}</div>`
+      +(n.hint?`<p class="qhint">${n.hint}</p>`:"")
+      +`<div class="opts">`+n.opts.map((o,i)=>
+        `<div class="opt" data-i="${i}">
+           <span><span class="ol">${o.ol}</span>${o.od?`<div class="od">${o.od}</div>`:""}</span>
+           <span class="arrow">→</span>
+         </div>`).join("")+`</div>`;
+    elFlowBody.querySelectorAll(".opt").forEach(op=>op.addEventListener("click",()=>{
+      const o=n.opts[+op.dataset.i];
+      if(o.next) stack.push({title:o.ol,node:o.next});
+      else stack.push({title:o.ol,recs:o.recs});
+      renderFlow();
+    }));
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("backBtn").addEventListener("click",()=>{
+  stack.pop();
+  if(!stack.length){elGuideFlow.classList.add("hidden");elGuideTop.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});}
+  else renderFlow();
+});
+document.getElementById("topBtn").addEventListener("click",()=>{
+  stack=[];elGuideFlow.classList.add("hidden");elGuideTop.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* =========================================================
+   5) キーワード検索
+   ========================================================= */
+const norm=s=>(s||"").toString().toLowerCase()
+  .replace(/[ァ-ン]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60))
+  .replace(/[\s　,、。・／/]+/g," ").trim();
+DB.forEach(p=>{p._hay={name:norm(p.name+" "+p.yomi),alias:norm((p.aliases||[]).join(" ")),
+  tags:norm((p.tags||[]).join(" ")),uses:norm(p.uses),desc:norm(p.desc)};});
+function scoreItem(p,tokens){let s=0,hit=0;for(const t of tokens){if(!t)continue;let g=0;
+  if(p._hay.name.includes(t))g=Math.max(g,6);if(p._hay.alias.includes(t))g=Math.max(g,5);
+  if(p._hay.tags.includes(t))g=Math.max(g,4);if(p._hay.uses.includes(t))g=Math.max(g,2);
+  if(p._hay.desc.includes(t))g=Math.max(g,1);if(g){s+=g;hit++;}}if(hit>1)s+=hit*2;return s;}
+function tokenize(q){const base=norm(q);if(!base)return[];const words=base.split(" ").filter(Boolean);
+  const set=new Set(words);if(words.length<=1&&base.replace(/ /g,"").length>=3){const c=base.replace(/ /g,"");
+  for(let n=2;n<=3;n++)for(let i=0;i+n<=c.length;i++)set.add(c.slice(i,i+n));}return[...set];}
+function highlight(text,tokens){if(!tokens||!tokens.length)return text;let out=text;
+  const ts=[...tokens].filter(t=>t.length>=2).sort((a,b)=>b.length-a.length);
+  for(const t of ts){const re=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");out=out.replace(re,m=>`<mark>${m}</mark>`);}return out;}
+const $q=document.getElementById("q"),$res=document.getElementById("results"),$meta=document.getElementById("meta");
+let curCat="all";
+function renderSearch(){const q=$q.value,tokens=tokenize(q);
+  let list=DB.filter(p=>curCat==="all"||p.cat===curCat);
+  if(tokens.length)list=list.map(p=>({p,s:scoreItem(p,tokens)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.p);
+  else list=list.slice().sort((a,b)=>a.id-b.id);
+  $meta.textContent=tokens.length?`「${q}」の検索結果：${list.length} 件`
+    :(curCat==="all"?`全 ${list.length} 件（キーワードで絞り込み）`:`${CATLABEL[curCat]}：${list.length} 件`);
+  $res.innerHTML=list.length?list.map(p=>cardHTML(p,null,tokens)).join("")
+    :`<div class="empty">該当なし。言い換え（例：「ゆるみ」「壁 固定」「木 つなぐ」）をお試しください。</div>`;}
+$q.addEventListener("input",renderSearch);
+document.getElementById("clear").addEventListener("click",()=>{$q.value="";renderSearch();$q.focus();});
+document.querySelectorAll("#filters .chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll("#filters .chip").forEach(x=>x.classList.remove("active"));
+  c.classList.add("active");curCat=c.dataset.cat;renderSearch();}));
+document.querySelectorAll(".ex").forEach(e=>e.addEventListener("click",()=>{$q.value=e.textContent;renderSearch();}));
+
+/* ====== モード切替 ====== */
+document.querySelectorAll(".modetab").forEach(tab=>tab.addEventListener("click",()=>{
+  document.querySelectorAll(".modetab").forEach(t=>t.classList.remove("active"));
+  tab.classList.add("active");const m=tab.dataset.mode;
+  document.getElementById("mode-guide").classList.toggle("hidden",m!=="guide");
+  document.getElementById("mode-search").classList.toggle("hidden",m!=="search");}));
+
+document.getElementById("count").textContent=DB.length;
+renderSearch();
+</script>
+</body>
+</html>
