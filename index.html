@@ -97,6 +97,13 @@
   .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
   .tag{background:var(--panel2);border:1px solid var(--line);color:var(--sub);
     border-radius:6px;padding:2px 8px;font-size:.74rem}
+  .actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+  .shopbtn{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-size:.82rem;
+    border-radius:8px;padding:6px 12px;border:1px solid var(--line);white-space:nowrap}
+  .shopbtn.primary{background:#1f7a3d;border-color:#2a9c50;color:#eafff1;font-weight:700}
+  .shopbtn.primary:hover{background:#239048}
+  .shopbtn.ghost{background:var(--panel2);color:var(--sub)}
+  .shopbtn.ghost:hover{color:var(--txt)}
   mark{background:rgba(255,180,84,.28);color:#ffd9a0;border-radius:3px;padding:0 2px}
 
   .examples{margin-top:12px;color:var(--sub);font-size:.82rem}
@@ -944,10 +951,20 @@ function specTable(p){
   if(!p.spec||!p.spec.length)return"";
   return `<table class="spec">`+p.spec.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join("")+`</table>`;
 }
+// 検索語：部品名から（）内や ／以降を除いた素直な語。p.q があれば優先。
+function shopQ(p){
+  const base=(p.q||p.name).replace(/[（(][^）)]*[）)]/g,"").split(/[／/]/)[0].trim();
+  return encodeURIComponent(base);
+}
 function cardHTML(p,why,tokens){
   const aliases=(p.aliases||[]).slice(0,6).map(a=>`<span class="tag">${a}</span>`).join("");
   const whyHTML=why?`<p class="why">💡 ${why}</p>`:"";
   const hi=t=>tokens?highlight(t,tokens):t;
+  const q=shopQ(p);
+  const actions=`<div class="actions">
+      <a class="shopbtn primary" href="https://www.cainz.com/search?q=${q}" target="_blank" rel="noopener noreferrer">🛒 カインズで見る</a>
+      <a class="shopbtn ghost" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener noreferrer">🖼 画像で見る</a>
+    </div>`;
   return `<div class="card"><div class="cardrow">
     <div class="illus">${illusHTML(p)}</div>
     <div class="cbody">
@@ -958,6 +975,7 @@ function cardHTML(p,why,tokens){
       <p class="uses"><b>用途：</b>${hi(p.uses)}</p>
       ${specTable(p)}
       <div class="tags">${aliases}</div>
+      ${actions}
     </div>
   </div></div>`;
 }
