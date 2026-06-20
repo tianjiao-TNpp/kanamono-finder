@@ -85,6 +85,7 @@
   .cat-bld{background:#3a2d18;color:#ffc97a}
   .cat-pipe{background:#143a2f;color:#6fe0b0}
   .cat-gen{background:#33283f;color:#cfa6ff}
+  .cat-chem{background:#3a1a2a;color:#ff9ec4}
   .why{margin:8px 0 4px;background:rgba(255,180,84,.12);border-left:3px solid var(--accent2);
     border-radius:0 8px 8px 0;padding:7px 11px;color:#ffd9a0;font-size:.9rem}
   .desc{margin:7px 0 6px;color:#d4dde6;font-size:.93rem}
@@ -205,6 +206,7 @@
       <span class="chip" data-cat="bld">建築・家具金物</span>
       <span class="chip" data-cat="pipe">配管・電設金物</span>
       <span class="chip" data-cat="gen">汎用</span>
+      <span class="chip" data-cat="chem">接着・補修</span>
     </div>
     <div class="examples">
       <b>例：</b>
@@ -323,6 +325,22 @@ const ICONS={
  velcro:`<rect x="8" y="13" width="32" height="8" rx="2"/><rect x="8" y="27" width="32" height="8" rx="2"/><path d="M13 13v-3M19 13v-3M25 13v-3M31 13v-3M37 13v-3"/>`,
  tensionspring:`<path d="M8 24h4l3-7 4 14 4-14 4 14 3-7h4"/><circle cx="9" cy="24" r="2"/>`,
  compspring:`<path d="M13 13v22M35 13v22"/><path d="M13 13h22M13 18h22M13 24h22M13 30h22M13 35h22"/>`,
+ glue:`<rect x="17" y="16" width="14" height="22" rx="2"/><rect x="20" y="9" width="8" height="7"/><path d="M24 9V4"/>`,
+ bottle:`<path d="M18 18h12v18a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2z"/><rect x="22" y="7" width="4" height="11"/><path d="M18 24h12"/>`,
+ tube:`<path d="M16 16h16v18a2 2 0 0 1-2 2H18a2 2 0 0 1-2-2z"/><path d="M16 16l3-5h10l3 5"/><rect x="22" y="6" width="4" height="5"/>`,
+ twotube:`<rect x="11" y="14" width="10" height="24" rx="2"/><rect x="27" y="14" width="10" height="24" rx="2"/><path d="M13 14l2-4h6l2 4M29 14l2-4h6l2 4"/>`,
+ gluegun:`<path d="M9 16h21v9H18l-4 9-2-9h-3z"/><rect x="5" y="18" width="4" height="5"/><path d="M30 20h9"/>`,
+ threadlock:`<rect x="18" y="15" width="12" height="23" rx="2"/><rect x="20" y="8" width="8" height="7"/><path d="M22 8V4h4v4"/><path d="M18 22h12"/>`,
+ caulkgun:`<rect x="13" y="14" width="17" height="9" rx="2"/><path d="M30 16h8l-3 3"/><path d="M13 23l-4 9h6"/><path d="M9 17h4"/>`,
+ putty:`<path d="M9 33h30"/><path d="M13 33c2-7 20-7 22 0"/><rect x="22" y="9" width="4" height="12"/><path d="M17 21h14v4H17z"/>`,
+ dtape:`<circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="6"/><path d="M10 24h28" stroke-dasharray="2 3"/>`,
+ tape:`<circle cx="19" cy="25" r="13"/><circle cx="19" cy="25" r="6"/><path d="M19 12h20v5"/>`,
+ sealtape:`<ellipse cx="24" cy="24" rx="14" ry="8"/><ellipse cx="24" cy="24" rx="6" ry="3"/>`,
+ spray:`<rect x="16" y="14" width="14" height="26" rx="2"/><rect x="19" y="8" width="8" height="6"/><rect x="21" y="5" width="3" height="3"/><path d="M27 6h6M27 9h5"/>`,
+ grease:`<rect x="15" y="16" width="18" height="22" rx="2"/><path d="M15 23h18"/><path d="M20 16v-4h8v4"/>`,
+ sandpaper:`<rect x="12" y="10" width="24" height="28" rx="1"/><circle cx="18" cy="18" r="1"/><circle cx="25" cy="16" r="1"/><circle cx="31" cy="20" r="1"/><circle cx="20" cy="26" r="1"/><circle cx="29" cy="28" r="1"/><circle cx="23" cy="32" r="1"/>`,
+ wireroll:`<circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="9"/><circle cx="24" cy="24" r="5"/>`,
+ rope:`<path d="M9 17q4 6 8 0t8 0 8 0"/><path d="M9 25q4 6 8 0t8 0 8 0"/><path d="M9 33q4 6 8 0t8 0 8 0"/>`,
 };
 function illusHTML(p){
   if(p.img) return `<img src="${p.img}" alt="${p.name}">`;
@@ -332,7 +350,7 @@ function illusHTML(p){
 /* =========================================================
    1) 部品データベース（pic=イラスト, spec=サイズ表）
    ========================================================= */
-const CATLABEL={fas:"締結部品",bld:"建築・家具金物",pipe:"配管・電設金物",gen:"汎用"};
+const CATLABEL={fas:"締結部品",bld:"建築・家具金物",pipe:"配管・電設金物",gen:"汎用",chem:"接着・補修・ケミカル"};
 const DB=[
   {id:1,name:"六角ボルト",yomi:"ろっかくぼると",cat:"fas",pic:"boltH",aliases:["ボルト","hex bolt","六角頭"],
    desc:"頭が六角形の最も標準的なボルト。ナットと組み合わせて部材を締結する。",uses:"鋼材・機械の一般締結、強度が必要な接合",
@@ -725,6 +743,123 @@ const DB=[
    desc:"押し縮める力に反発するばね。隙間に入れて押し戻す力を得る。",uses:"押し戻し機構、ガタ詰め、ボタンの戻し",
    spec:[["線径/外径/自由長","各種"],["材質","ピアノ線/SUS"]],
    tags:["押し返す","反発する","隙間を詰める","ばね"]},
+
+  /* ===== 接着・補修・ケミカル（カインズの消耗品コーナー） ===== */
+  {id:200,name:"瞬間接着剤",yomi:"しゅんかんせっちゃくざい",cat:"chem",pic:"glue",zh:"强力瞬间胶",zhUse:"小件快速粘接",
+   aliases:["アロンアルファ","瞬着","instant glue","シアノアクリレート"],
+   desc:"数秒で固まる強力接着剤。小物の素早い接着に。",uses:"プラ・ゴム・金属・木の小物接着",
+   spec:[["硬化","数秒〜数十秒"],["種類","液状/ゼリー状"],["注意","皮膚接着に注意"]],
+   tags:["すぐくっつく","素早く接着","小物","瞬間"]},
+  {id:201,name:"木工用ボンド",yomi:"もっこうようぼんど",cat:"chem",pic:"bottle",zh:"白乳胶(木工胶)",zhUse:"木材粘接组装",
+   aliases:["白ボンド","酢ビ","wood glue","木工ボンド"],
+   desc:"木材用の白い接着剤。乾くと透明。クランプ併用で強固。",uses:"木材の接着・組み立て",
+   spec:[["乾燥","数時間"],["種類","一般/速乾/耐水"]],
+   tags:["木をくっつける","木工","白いボンド","組み立て"]},
+  {id:202,name:"多用途接着剤",yomi:"たようとせっちゃくざい",cat:"chem",pic:"tube",zh:"多用途万能胶",zhUse:"多材料通用粘接",
+   aliases:["ボンドG17","セメダイン","万能接着剤","contact cement","ゴム系"],
+   desc:"ゴム系の万能接着剤。両面に塗って貼り合わせる。",uses:"革・ゴム・金属・木など幅広く",
+   spec:[["タイプ","ゴム系/弾性"],["塗り","両面に塗り圧着"]],
+   tags:["なんでもくっつく","万能","革やゴム","強力"]},
+  {id:203,name:"エポキシ接着剤（2液）",yomi:"えぽきしせっちゃくざい",cat:"chem",pic:"twotube",zh:"环氧树脂胶(AB胶)",zhUse:"高强度粘接/填缝",
+   aliases:["2液","AB","epoxy","二液混合","エポキシ"],
+   desc:"主剤と硬化剤を混ぜて使う強力接着剤。すき間充填も可。",uses:"金属・陶器・強度が要る接着",
+   spec:[["混合","1:1で練り混ぜ"],["硬化","5分〜数時間"]],
+   tags:["最強の接着","金属や陶器","2液混合","すき間も埋める"]},
+  {id:204,name:"弾性接着剤",yomi:"だんせいせっちゃくざい",cat:"chem",pic:"tube",zh:"弹性胶",zhUse:"抗振防水多用途粘接",
+   aliases:["ウルトラ多用途SU","スーパーX","弾性","変成シリコン系"],
+   desc:"硬化後もゴム弾性。衝撃・振動に強く屋外にも使える。",uses:"多用途・屋外・振動部の接着",
+   spec:[["特徴","弾性・耐水・耐候"]],
+   tags:["振動に強い","屋外OK","ゴムのように","多用途"]},
+  {id:205,name:"グルーガン",yomi:"ぐるーがん",cat:"chem",pic:"gluegun",zh:"热熔胶枪",zhUse:"手工/临时快速粘接",
+   aliases:["ホットボンド","hot glue","ホットメルト","グルースティック"],
+   desc:"樹脂スティックを熱で溶かして接着。すぐ固まる。",uses:"工作・仮固定・布や飾り",
+   spec:[["スティック","φ7 / φ11"],["用途","DIY・クラフト"]],
+   tags:["熱で溶かす","工作","すぐ固まる","仮固定"]},
+  {id:206,name:"ねじ緩み止め剤",yomi:"ねじゆるみどめざい",cat:"chem",pic:"threadlock",zh:"螺纹锁固胶",zhUse:"防止螺丝振动松动",
+   aliases:["ロックタイト","ねじロック","threadlocker","嫌気性接着剤"],
+   desc:"ねじ山に塗って緩みを防ぐ液。中強度/高強度がある。",uses:"振動で緩むねじの固定",
+   spec:[["強度","中(青)/高(赤)"]],
+   tags:["ねじの緩み止め","液体","振動対策","塗って固定"]},
+  {id:207,name:"シリコンシーラント（コーキング）",yomi:"しりこんしーらんと",cat:"chem",pic:"caulkgun",zh:"硅胶密封胶(玻璃胶)",zhUse:"缝隙防水密封",
+   aliases:["コーキング","シーリング","caulk","バスコーク","ガラスコーキング"],
+   desc:"すき間を埋めて防水するゴム状の充填材。コーキングガンで施工。",uses:"水回り・窓・外壁のすき間防水",
+   spec:[["種類","シリコン/変成シリコン"],["用途","防水・防カビ"]],
+   tags:["すき間を埋める","防水","水回り","コーキング","目地"]},
+  {id:208,name:"補修パテ",yomi:"ほしゅうぱて",cat:"chem",pic:"putty",zh:"补土/补缝腻子",zhUse:"填补孔洞/缺口",
+   aliases:["エポキシパテ","木部パテ","穴埋め","putty","かべパテ"],
+   desc:"穴・欠け・段差を埋めて成形する補修材。硬化後に削れる。",uses:"壁・木部・金属の穴埋め補修",
+   spec:[["種類","エポキシ/木部/かべ用"]],
+   tags:["穴を埋める","欠けを直す","補修","削れる"]},
+  {id:209,name:"両面テープ",yomi:"りょうめんてーぷ",cat:"chem",pic:"dtape",zh:"双面胶",zhUse:"免打孔粘贴固定",
+   aliases:["強力両面テープ","double-sided tape","アクリルフォーム"],
+   desc:"両面が粘着のテープ。ねじ穴なしで固定。強力タイプは屋外も可。",uses:"小物・看板・内装の貼り付け固定",
+   spec:[["幅","5〜50mm"],["種類","一般/強力/防水"]],
+   tags:["ねじ穴なしで貼る","貼って固定","強力","小物"]},
+  {id:210,name:"ビニルテープ（絶縁）",yomi:"びにるてーぷ",cat:"chem",pic:"tape",zh:"绝缘电工胶带",zhUse:"电线绝缘/捆扎",
+   aliases:["絶縁テープ","電工テープ","ビニテ","insulation tape"],
+   desc:"電気絶縁・結束に使う塩ビの粘着テープ。",uses:"電線の絶縁・補修・結束",
+   spec:[["幅","19mm 等"],["色","黒/各色"]],
+   tags:["電気を絶縁","電線に巻く","結束","電工"]},
+  {id:211,name:"養生テープ",yomi:"ようじょうてーぷ",cat:"chem",pic:"tape",zh:"养生胶带(美纹)",zhUse:"临时固定/遮蔽保护",
+   aliases:["養生","仮止めテープ","手で切れる","masking"],
+   desc:"手で切れて跡が残りにくい仮止めテープ。塗装・引越しの保護に。",uses:"養生・仮固定・マスキング",
+   spec:[["幅","50mm 等"],["特徴","手切れ・弱粘着"]],
+   tags:["跡が残らない","仮止め","保護","手で切れる"]},
+  {id:212,name:"布ガムテープ",yomi:"ぬのがむてーぷ",cat:"chem",pic:"tape",zh:"布基胶带",zhUse:"纸箱打包/补修",
+   aliases:["布テープ","ガムテープ","cloth tape","梱包"],
+   desc:"手で切れる強粘着の布テープ。梱包・補修に。",uses:"段ボール梱包・結束・補修",
+   spec:[["幅","50mm"],["材質","布基材"]],
+   tags:["梱包","強力に貼る","段ボール","補修"]},
+  {id:213,name:"アルミテープ",yomi:"あるみてーぷ",cat:"chem",pic:"tape",zh:"铝箔胶带",zhUse:"风管/耐热部位补修",
+   aliases:["aluminum tape","アルミ箔","耐熱テープ"],
+   desc:"アルミ箔の粘着テープ。耐熱・遮熱・ダクト補修に。",uses:"ダクト・耐熱部の補修・目張り",
+   spec:[["幅","50mm"],["特徴","耐熱・遮熱"]],
+   tags:["耐熱","ダクト補修","アルミ箔","遮熱"]},
+  {id:214,name:"シールテープ（配管）",yomi:"しーるてーぷ",cat:"chem",pic:"sealtape",zh:"生料带(管螺纹密封带)",zhUse:"管螺纹防漏密封",
+   aliases:["生テープ","ねじシール","PTFE","水栓テープ","シールテープ"],
+   desc:"ねじ込み配管のねじ部に巻いて水漏れを防ぐ白い薄テープ。",uses:"水道・ガスのねじ接続の止水",
+   spec:[["材質","PTFE"],["巻き","ねじ山に数回"]],
+   tags:["水漏れ防止","配管ねじ","止水","巻くテープ"]},
+  {id:215,name:"自己融着テープ",yomi:"じこゆうちゃくてーぷ",cat:"chem",pic:"tape",zh:"自粘性绝缘胶带",zhUse:"防水/绝缘缠绕",
+   aliases:["self-fusing","融着","防水テープ","絶縁自己融着"],
+   desc:"引き伸ばして巻くと自ら融着し一体化する。防水・絶縁に。",uses:"配線防水・ホース応急補修",
+   spec:[["特徴","粘着剤なし・自己融着"]],
+   tags:["防水で巻く","融着","絶縁","応急補修"]},
+  {id:216,name:"潤滑スプレー",yomi:"じゅんかつすぷれー",cat:"chem",pic:"spray",zh:"防锈润滑剂",zhUse:"润滑/防锈/松动锈死",
+   aliases:["CRC","KURE5-56","556","防錆潤滑","lubricant"],
+   desc:"防錆・潤滑・水置換の多用途オイルスプレー。",uses:"きしみ・固着・サビの潤滑",
+   spec:[["用途","潤滑/防錆/水置換"],["注意","樹脂・ゴムに注意"]],
+   tags:["きしみを取る","固着をゆるめる","潤滑","防錆","油"]},
+  {id:217,name:"シリコンスプレー",yomi:"しりこんすぷれー",cat:"chem",pic:"spray",zh:"硅油喷剂",zhUse:"改善滑动/保养胶塑",
+   aliases:["silicone spray","シリコーン","滑り剤"],
+   desc:"樹脂・ゴムにも使える滑り剤。すべりを良くする。",uses:"引き出し・ゴム・樹脂の滑り改善",
+   spec:[["特徴","無溶剤/速乾タイプ有"]],
+   tags:["滑りを良く","樹脂やゴムOK","引き出し","滑り剤"]},
+  {id:218,name:"グリス",yomi:"ぐりす",cat:"chem",pic:"grease",zh:"润滑脂(黄油)",zhUse:"轴承/齿轮长效润滑",
+   aliases:["グリース","潤滑脂","grease","ちょう度"],
+   desc:"半固体の潤滑剤。長持ちする摺動部の潤滑に。",uses:"軸受・ギア・蝶番の潤滑",
+   spec:[["種類","万能/リチウム/シリコン"]],
+   tags:["長持ち潤滑","軸やギア","半固体","摺動部"]},
+  {id:219,name:"防錆スプレー",yomi:"ぼうせいすぷれー",cat:"chem",pic:"spray",zh:"防锈喷剂",zhUse:"金属表面防锈",
+   aliases:["防錆剤","さび止め","rust preventive","亜鉛"],
+   desc:"金属表面に皮膜を作りサビを防ぐスプレー。",uses:"鉄部・溶接部のサビ止め",
+   spec:[["種類","油性/亜鉛めっき調"]],
+   tags:["サビを防ぐ","さび止め","金属の保護","皮膜"]},
+  {id:220,name:"紙やすり（サンドペーパー）",yomi:"かみやすり",cat:"chem",pic:"sandpaper",zh:"砂纸",zhUse:"打磨/抛光表面",
+   aliases:["サンドペーパー","sandpaper","耐水ペーパー","研磨紙","番手"],
+   desc:"表面を削り平滑にする研磨紙。番手で粗さを選ぶ。",uses:"木・金属・塗装前の研磨",
+   spec:[["番手","#60〜#2000"],["種類","空研ぎ/耐水"]],
+   tags:["削る","磨く","平らにする","研磨","塗装前"]},
+  {id:221,name:"結束線・番線",yomi:"けっそくせん",cat:"chem",pic:"wireroll",zh:"扎丝/铁丝",zhUse:"钢筋捆扎/临时固定",
+   aliases:["番線","結束線","なまし鉄線","tie wire","針金"],
+   desc:"鉄筋や物をしばって固定する柔らかい鉄線。",uses:"鉄筋結束・仮固定・園芸",
+   spec:[["太さ","#21/#18 等"],["材質","なまし鉄線/ステン"]],
+   tags:["しばる","針金","結束","仮固定","曲げて留める"]},
+  {id:222,name:"PPロープ・荷造り紐",yomi:"ぴーぴーろーぷ",cat:"chem",pic:"rope",zh:"塑料绳/打包绳",zhUse:"打包/固定/隔离",
+   aliases:["ロープ","PPロープ","荷造り紐","packing rope","トラロープ"],
+   desc:"荷造り・仕切り・養生に使う樹脂ロープ。",uses:"梱包・固定・立入禁止表示",
+   spec:[["太さ","各種"],["材質","PP/PE/標識(トラ)"]],
+   tags:["しばる","荷造り","仕切る","ロープ","紐"]},
 ];
 const byId=id=>DB.find(p=>p.id===id);
 
@@ -751,7 +886,7 @@ const ZH={
  170:"护线圈（橡胶护套）",171:"防振橡胶（减震垫）",172:"O型密封圈",173:"缓冲胶垫（防撞垫）",174:"魔术贴（粘扣带）",
  175:"拉簧",176:"压簧",
 };
-DB.forEach(p=>{p.zh=ZH[p.id]||"";});
+DB.forEach(p=>{p.zh=ZH[p.id]||p.zh||"";});
 
 /* ===== 中文：用途の一言訳 ===== */
 const ZHUSE={
@@ -777,7 +912,16 @@ const ZHUSE={
  170:"保护穿孔电线",171:"减震防噪、吸收晃动",172:"密封防漏(水/气/油)",173:"消音、防撞、护面",174:"反复粘贴、捆扎临时固定",
  175:"回位、施加张力",176:"回弹、填隙",
 };
-DB.forEach(p=>{p.zhUse=ZHUSE[p.id]||"";});
+DB.forEach(p=>{p.zhUse=ZHUSE[p.id]||p.zhUse||"";});
+
+/* ===== 中文：検索用の汎用同義語（非表示）===== */
+const ZHX={
+ 200:"胶水 强力胶",201:"胶水 木胶",202:"胶水 万能胶",203:"胶水 ab胶",204:"胶水",205:"胶水 热熔胶",206:"螺丝胶 螺纹胶",
+ 209:"胶带 双面胶",210:"胶带 电工胶",211:"胶带",212:"胶带 胶布",213:"胶带",215:"胶带",
+ 220:"砂皮 砂布",221:"铁丝 绑线",222:"绳子",
+ 1:"螺丝 螺栓",2:"螺丝",7:"螺丝",8:"螺丝",11:"螺丝 木螺丝",30:"铰链",31:"铰链",
+};
+DB.forEach(p=>{p.zhx=ZHX[p.id]||"";});
 
 /* ===== 中文：カテゴリ（最外側タイル）訳 ===== */
 const INTENT_ZH={
@@ -1119,6 +1263,72 @@ const INTENTS=[
     {ol:"電線を機器のねじ端子へ",od:"端子台・盤",recs:[
       {id:70,why:"電線先に圧着してねじ留めできる圧着端子。"}]},
    ]}},
+
+ {key:"glue",ic:"🧴",label:"接着する・貼る",sub:"くっつけたい",
+  root:{q:"何を接着しますか？",
+   opts:[
+    {ol:"小物を素早く（プラ・ゴム・金属）",od:"すぐ固めたい",recs:[
+      {id:200,why:"数秒で固まる瞬間接着剤。小物に最適。"},
+      {id:204,why:"振動・屋外・はがれやすい所は弾性接着剤が安心。"}]},
+    {ol:"木材を接着したい",od:"木工・組み立て",recs:[
+      {id:201,why:"木工用ボンド。クランプで圧着すると強固。"}]},
+    {ol:"いろんな素材を強力に",od:"革・ゴム・金属など",recs:[
+      {id:202,why:"両面に塗って圧着する万能接着剤。"},
+      {id:203,why:"最強の強度＆すき間充填はエポキシ(2液)。"}]},
+    {ol:"ねじ穴をあけずに貼って固定",od:"小物・看板・内装",recs:[
+      {id:209,why:"強力両面テープで穴あけ不要。屋外は防水タイプ。"},
+      {id:204,why:"重め・屋外は弾性接着剤で面接着。"}]},
+    {ol:"工作・仮固定したい",od:"DIY・クラフト",recs:[
+      {id:205,why:"グルーガンで熱接着、すぐ固まる。"}]},
+    {ol:"ねじの緩み止め（液体）",od:"振動で緩むねじ",recs:[
+      {id:206,why:"ねじ山に塗る緩み止め剤。中強度/高強度。"}]},
+   ]}},
+
+ {key:"seal",ic:"🛁",label:"すき間を埋める・防水・絶縁",sub:"埋める/防水",
+  root:{q:"目的はどれですか？",
+   opts:[
+    {ol:"水回り・窓のすき間を防水",od:"お風呂・洗面・外壁",recs:[
+      {id:207,why:"ゴム状に固まり防水するシリコンシーラント。"}]},
+    {ol:"穴・欠け・段差を埋めて補修",od:"壁・木部・金属",recs:[
+      {id:208,why:"練って盛り、硬化後に削れる補修パテ。"}]},
+    {ol:"配管ねじの水漏れを防ぐ",od:"水道・ガスのねじ接続",recs:[
+      {id:214,why:"ねじ山に巻くシールテープ(PTFE)。"}]},
+    {ol:"電線を絶縁・防水で巻く",od:"配線の保護",recs:[
+      {id:210,why:"塩ビのビニルテープで絶縁・結束。"},
+      {id:215,why:"防水重視なら自己融着テープで一体化。"}]},
+   ]}},
+
+ {key:"tape",ic:"🩹",label:"テープでとめる・梱包・養生",sub:"貼る/まとめる",
+  root:{q:"用途はどれですか？",
+   opts:[
+    {ol:"ねじ穴なしで固定したい",od:"小物・内装",recs:[
+      {id:209,why:"両面が粘着の両面テープ。強力/防水タイプ有。"}]},
+    {ol:"梱包・しばる・補修（強力）",od:"段ボール・荷造り",recs:[
+      {id:212,why:"手で切れる強粘着の布ガムテープ。"},
+      {id:222,why:"束ねる・仕切るならPPロープ。"},
+      {id:221,why:"針金で結束するなら番線。"}]},
+    {ol:"塗装・引越しの保護（剥がせる）",od:"跡を残したくない",recs:[
+      {id:211,why:"手で切れて跡が残りにくい養生テープ。"}]},
+    {ol:"電気絶縁",od:"配線まわり",recs:[
+      {id:210,why:"電気絶縁・結束のビニルテープ。"}]},
+    {ol:"耐熱・ダクト補修",od:"熱がかかる所",recs:[
+      {id:213,why:"耐熱・遮熱のアルミテープ。"}]},
+   ]}},
+
+ {key:"chem",ic:"🛢️",label:"潤滑・防錆・磨く",sub:"ケミカル",
+  root:{q:"何をしたいですか？",
+   opts:[
+    {ol:"きしみ・固着・サビをゆるめる",od:"動きが渋い・固い",recs:[
+      {id:216,why:"潤滑・防錆・水置換の多用途スプレー(5-56等)。"}]},
+    {ol:"滑りを良くしたい（樹脂・ゴムOK）",od:"引き出し・建具",recs:[
+      {id:217,why:"樹脂やゴムにも使えるシリコンスプレー。"}]},
+    {ol:"長持ちする潤滑（軸・ギア）",od:"摺動部",recs:[
+      {id:218,why:"半固体で長持ちするグリス。"}]},
+    {ol:"金属のサビを防ぎたい",od:"鉄部・溶接部",recs:[
+      {id:219,why:"皮膜を作る防錆スプレー。"}]},
+    {ol:"表面を磨く・削る",od:"塗装前・バリ取り",recs:[
+      {id:220,why:"番手で粗さを選ぶ紙やすり。"}]},
+   ]}},
 ];
 
 /* =========================================================
@@ -1226,7 +1436,7 @@ const norm=s=>(s||"").toString().toLowerCase()
   .replace(/[\s　,、。・／/]+/g," ").trim();
 DB.forEach(p=>{p._hay={name:norm(p.name+" "+p.yomi),alias:norm((p.aliases||[]).join(" ")),
   tags:norm((p.tags||[]).join(" ")),uses:norm(p.uses),desc:norm(p.desc),
-  zhname:norm(p.zh),zhuse:norm(p.zhUse)};});
+  zhname:norm((p.zh||"")+" "+(p.zhx||"")),zhuse:norm(p.zhUse)};});
 function scoreItem(p,tokens){let s=0,hit=0;for(const t of tokens){if(!t)continue;let g=0;
   if(p._hay.name.includes(t))g=Math.max(g,6);
   if(p._hay.zhname.includes(t))g=Math.max(g,6);   // 中文名でも検索可
@@ -1236,7 +1446,12 @@ function scoreItem(p,tokens){let s=0,hit=0;for(const t of tokens){if(!t)continue
   if(p._hay.uses.includes(t))g=Math.max(g,2);
   if(p._hay.desc.includes(t))g=Math.max(g,1);if(g){s+=g;hit++;}}if(hit>1)s+=hit*2;return s;}
 function tokenize(q){const base=norm(q);if(!base)return[];const words=base.split(" ").filter(Boolean);
-  const set=new Set(words);if(words.length<=1&&base.replace(/ /g,"").length>=3){const c=base.replace(/ /g,"");
+  const set=new Set(words);
+  // 中国語（漢字のみの語）は1文字・2文字に分解して部分一致できるように（胶水→胶/水 等）
+  words.forEach(w=>{if(/^[一-鿿]+$/.test(w)&&w.length>=2){
+    for(let i=0;i<w.length;i++)set.add(w[i]);
+    for(let i=0;i+2<=w.length;i++)set.add(w.substr(i,2));}});
+  if(words.length<=1&&base.replace(/ /g,"").length>=3){const c=base.replace(/ /g,"");
   for(let n=2;n<=3;n++)for(let i=0;i+n<=c.length;i++)set.add(c.slice(i,i+n));}return[...set];}
 function highlight(text,tokens){if(!tokens||!tokens.length)return text;let out=text;
   const ts=[...tokens].filter(t=>t.length>=2).sort((a,b)=>b.length-a.length);
