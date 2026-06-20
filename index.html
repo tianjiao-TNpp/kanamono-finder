@@ -104,6 +104,38 @@
   .shopbtn.primary:hover{background:#239048}
   .shopbtn.ghost{background:var(--panel2);color:var(--sub)}
   .shopbtn.ghost:hover{color:var(--txt)}
+
+  /* quiz */
+  .quizbar{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;margin:14px 2px;color:var(--sub);font-size:.9rem}
+  .quizbar b{color:var(--txt)}
+  .quizbar .streak{color:var(--accent2)}
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 16px;box-shadow:var(--shadow);text-align:center}
+  .qprompt{font-size:1.05rem;color:var(--sub)}
+  .qword{font-size:1.7rem;font-weight:800;margin-top:6px}
+  .qyomi{color:var(--sub);font-size:.85rem;margin-top:2px}
+  .qbigill{width:130px;height:130px;margin:10px auto 4px;color:var(--accent);
+    display:flex;align-items:center;justify-content:center;background:var(--panel2);border:1px solid var(--line);border-radius:14px}
+  .qbigill svg{width:104px;height:104px}
+  .qbigill img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+  .qopts{display:grid;gap:10px;margin-top:18px}
+  .qopts.names{grid-template-columns:1fr}
+  .qopts.imgs{grid-template-columns:repeat(2,1fr)}
+  .qopt{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;
+    cursor:pointer;font-size:1.02rem;transition:.12s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .qopt:hover{border-color:var(--accent)}
+  .qopt.imgopt{flex-direction:column;color:var(--accent);min-height:96px}
+  .qopt.imgopt svg{width:66px;height:66px}
+  .qopt.imgopt img{width:66px;height:66px;object-fit:cover;border-radius:8px}
+  .qopt.correct{background:#1f7a3d;border-color:#2a9c50;color:#eafff1}
+  .qopt.wrong{background:#7a2230;border-color:#a83a4a;color:#ffe1e6}
+  .qopt.dim{opacity:.4}
+  .qopt.locked{cursor:default}
+  .qfeedback{margin-top:16px;font-size:.92rem;color:#d4dde6;text-align:left;min-height:1.2em}
+  .qfeedback b{color:var(--txt)}
+  .qbottom{margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .qnext{background:var(--accent);border:none;color:#06121f;font-weight:700;border-radius:12px;padding:12px 22px;cursor:pointer;font-size:1rem}
+  .qskip{background:var(--panel2);border:1px solid var(--line);color:var(--sub);border-radius:12px;padding:12px 18px;cursor:pointer;font-size:.95rem}
+  .qskip:hover{color:var(--txt)}
   mark{background:rgba(255,180,84,.28);color:#ffd9a0;border-radius:3px;padding:0 2px}
 
   .examples{margin-top:12px;color:var(--sub);font-size:.82rem}
@@ -127,6 +159,7 @@
   <div class="modetabs">
     <div class="modetab active" data-mode="guide">🧭 用途から探す</div>
     <div class="modetab" data-mode="search">🔍 キーワード検索</div>
+    <div class="modetab" data-mode="quiz">🎴 金物クイズ</div>
   </div>
 
   <!-- ========== 用途から探す ========== -->
@@ -165,6 +198,12 @@
     </div>
     <div class="meta" id="meta"></div>
     <div id="results"></div>
+  </section>
+
+  <!-- ========== 金物クイズ（五金百词斩） ========== -->
+  <section id="mode-quiz" class="hidden">
+    <p class="lead">イラストと名前を当てる4択クイズ。金物の名前を「見て覚える」練習モード（五金百词斩）。</p>
+    <div id="quizBody"></div>
   </section>
 
   <footer>
@@ -1068,12 +1107,94 @@ document.querySelectorAll("#filters .chip").forEach(c=>c.addEventListener("click
   c.classList.add("active");curCat=c.dataset.cat;renderSearch();}));
 document.querySelectorAll(".ex").forEach(e=>e.addEventListener("click",()=>{$q.value=e.textContent;renderSearch();}));
 
+/* =========================================================
+   6) 金物クイズ（五金百词斩）
+      A: 名前 → 正しいイラストを選ぶ / B: イラスト → 正しい名前を選ぶ
+   ========================================================= */
+const elQuiz=document.getElementById("quizBody");
+const quiz={total:0,correct:0,streak:0,best:0,answered:false,cur:null};
+try{quiz.best=parseInt(localStorage.getItem("kanamono_best")||"0",10)||0;}catch(e){}
+const rint=n=>Math.floor(Math.random()*n);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rint(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function newQuestion(){
+  quiz.answered=false;
+  const target=DB[rint(DB.length)];
+  const type=Math.random()<0.5?"A":"B";
+  let distractors;
+  if(type==="A"){ // 選択肢は画像。見た目が被らないよう pic を全て別にする
+    const usedPic=new Set([target.pic]); distractors=[];
+    for(const p of shuffle(DB.filter(p=>p!==target))){
+      if(distractors.length>=3)break;
+      if(!usedPic.has(p.pic)){usedPic.add(p.pic);distractors.push(p);}
+    }
+  }else{ // 選択肢は名前。画像が一意に対応するよう同じ pic の品目は除外
+    distractors=shuffle(DB.filter(p=>p!==target&&p.pic!==target.pic)).slice(0,3);
+  }
+  quiz.cur={target,type,opts:shuffle([target,...distractors])};
+  renderQuiz();
+}
+function quizBar(){
+  const rate=quiz.total?`（${Math.round(quiz.correct/quiz.total*100)}%）`:"";
+  return `<div class="quizbar">
+    <span>出題 <b>${quiz.total}</b></span>
+    <span>正解 <b>${quiz.correct}</b>${rate}</span>
+    <span class="streak">🔥 連続 <b>${quiz.streak}</b></span>
+    <span>最高 <b>${quiz.best}</b></span>
+  </div>`;
+}
+function renderQuiz(){
+  const {target,type,opts}=quiz.cur;
+  let prompt,optsHTML;
+  if(type==="B"){
+    prompt=`<div class="qprompt">これは何という金物？</div>
+      <div class="qbigill">${illusHTML(target)}</div>
+      <div class="qyomi">ヒント：${target.uses}</div>`;
+    optsHTML=`<div class="qopts names">`+opts.map((p,i)=>`<div class="qopt" data-i="${i}">${p.name}</div>`).join("")+`</div>`;
+  }else{
+    prompt=`<div class="qprompt">この金物はどれ？</div>
+      <div class="qword">${target.name}</div><div class="qyomi">${target.yomi}</div>`;
+    optsHTML=`<div class="qopts imgs">`+opts.map((p,i)=>`<div class="qopt imgopt" data-i="${i}">${illusHTML(p)}</div>`).join("")+`</div>`;
+  }
+  elQuiz.innerHTML=`<div id="qbar">${quizBar()}</div><div class="qcard">${prompt}${optsHTML}
+    <div class="qfeedback" id="qfb"></div>
+    <div class="qbottom">
+      <button class="qskip" id="qskip">わからない</button>
+      <button class="qnext hidden" id="qnext">次の問題 →</button>
+    </div></div>`;
+  elQuiz.querySelectorAll(".qopt").forEach(o=>o.addEventListener("click",()=>answerQuiz(+o.dataset.i)));
+  document.getElementById("qskip").addEventListener("click",()=>answerQuiz(-1));
+  document.getElementById("qnext").addEventListener("click",newQuestion);
+}
+function answerQuiz(i){
+  if(quiz.answered)return; quiz.answered=true;
+  const {target,opts}=quiz.cur;
+  const chosen=i>=0?opts[i]:null;
+  const ok=chosen===target;
+  quiz.total++;
+  if(ok){quiz.correct++;quiz.streak++;if(quiz.streak>quiz.best){quiz.best=quiz.streak;try{localStorage.setItem("kanamono_best",String(quiz.best));}catch(e){}}}
+  else quiz.streak=0;
+  elQuiz.querySelectorAll(".qopt").forEach((n,idx)=>{
+    n.classList.add("locked");
+    if(opts[idx]===target)n.classList.add("correct");
+    else if(idx===i)n.classList.add("wrong");
+    else n.classList.add("dim");
+  });
+  document.getElementById("qbar").innerHTML=quizBar();
+  document.getElementById("qfb").innerHTML=(i<0?"🤔 答え：":(ok?"⭕ 正解！ ":"❌ 不正解 "))
+    +`<b>${target.name}</b>（${target.yomi}）— ${target.desc}`;
+  document.getElementById("qskip").classList.add("hidden");
+  document.getElementById("qnext").classList.remove("hidden");
+}
+
 /* ====== モード切替 ====== */
 document.querySelectorAll(".modetab").forEach(tab=>tab.addEventListener("click",()=>{
   document.querySelectorAll(".modetab").forEach(t=>t.classList.remove("active"));
   tab.classList.add("active");const m=tab.dataset.mode;
   document.getElementById("mode-guide").classList.toggle("hidden",m!=="guide");
-  document.getElementById("mode-search").classList.toggle("hidden",m!=="search");}));
+  document.getElementById("mode-search").classList.toggle("hidden",m!=="search");
+  document.getElementById("mode-quiz").classList.toggle("hidden",m!=="quiz");
+  if(m==="quiz"&&!quiz.cur)newQuestion();}));
 
 document.getElementById("count").textContent=DB.length;
 renderSearch();
