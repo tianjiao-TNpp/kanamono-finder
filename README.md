@@ -4,7 +4,7 @@
 単体HTML・オフライン動作。ブラウザで開くだけで使えます。
 
 ## 公開リンク
-GitHub Pages: （リポジトリ作成後に追記）
+**https://tianjiao-tnpp.github.io/kanamono-finder/**
 
 ## 特長
 - 🧭 **用途から探す（診断式）** — 材料・状況をタップで辿り、候補と「なぜそれか」を提示
